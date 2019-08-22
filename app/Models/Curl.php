@@ -19,8 +19,13 @@ class Curl extends Model
 
     const url_juzs = "http://staging.quran.com:3000/api/v3/juzs";
     const name_juzs = "juzs";
-    const url_verses = "https://quran.com/api/api/v3/chapters/112/verses?translations%5B%5D=20&language=en";
+
+    // const url_verses = "https://quran.com/api/api/v3/chapters/112/verses?translations%5B%5D=20&language=en";
+    // const name_verses = "verses";
+
+    const url_verses = "http://staging.quran.com:3000/api/v3/chapters/{id}/verses?language=en&page={page}&text_type=words";
     const name_verses = "verses";
+
 
     public function curl($url, $name=null){
         $curl_options = array(
