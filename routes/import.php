@@ -15,3 +15,4 @@ Route::get('/chapters-info', 'ImportController@chapter_info')->name('import.chap
 Route::get('/juzs', 'ImportController@juzs')->name('import.juzs');
 Route::get('/index-wbw', 'ImportController@wbw_index_generator')->name('import.wbw_index_generator');
 Route::get('/verses/{truncate}', 'ImportController@verses')->name('import.verses');
+Route::get('/create-wbw-indexes/{truncate}', 'ImportController@create_wbw_index')->name('import.create_wbw_index');

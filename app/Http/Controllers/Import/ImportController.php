@@ -232,7 +232,7 @@ class ImportController extends Controller
         <head><title>Index of /wbw/</title></head>
         <body bgcolor="white">
         <h1>Index of /wbw/</h1><hr><pre>');
-        if($truncate == 1){
+        if ($truncate == 1) {
             Verses::truncate();
             Words::truncate();
             Translations::truncate();
@@ -332,6 +332,32 @@ class ImportController extends Controller
         return [
             'status' => $count . " verses successfully inserted",
             'data' => "Not shown intentionally (Would be Too Long)",
+        ];
+    }
+
+    protected function create_wbw_index($truncate = 0)
+    {
+        if ($truncate == 1) {
+            $path = 'index.html';
+            Storage::disk('public')->put($path, '<html>
+        <head><title>Index of /wbw/</title></head>
+        <body bgcolor="white">
+        <h1>Index of /wbw/</h1><hr><pre>');
+        }
+        $words = Words::get();
+        $count = 0;
+        foreach($words as $word){
+            $file = explode('/', $word->audio_url);
+            $file_name = end($file);
+            Storage::disk('public')->append($path, '<a href="' . $file_name . '">' . $file_name . '</a>                                         27-Jul-2015 08:47               97809');
+            $count++;
+        }
+        Storage::disk('public')->append($path, '</pre><hr></body>
+        </html>');
+
+        return [
+            'status' => $count . " indexes created successfully",
+            'data' => $words->first()->audio_url." to ".$words->last()->audio_url,
         ];
     }
 }
