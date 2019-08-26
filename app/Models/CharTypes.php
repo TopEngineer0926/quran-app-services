@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +16,7 @@ class CharTypes extends Model
 {
     /**
      * Indicates if the IDs are auto-incrementing.
-     * 
+     *
      * @var bool
      */
     public $incrementing = false;

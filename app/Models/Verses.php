@@ -43,4 +43,8 @@ class Verses extends Model
      */
     protected $fillable = ['chapter_id', 'verse_number', 'verse_index', 'verse_key', 'text_madani', 'text_indopak', 'text_simple', 'juz_number', 'hizb_number', 'rub_number', 'sajdah', 'sajdah_number', 'page_number', 'created_at', 'updated_at', 'image_url', 'image_width', 'verse_root_id', 'verse_lemma_id', 'verse_stem_id', 'text_imlaei', 'text_uthmani_simple'];
 
+    public function words()
+    {
+        return $this->hasMany('App\Models\Words','verse_id','id');
+    }
 }

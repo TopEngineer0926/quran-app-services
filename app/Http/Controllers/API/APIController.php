@@ -8,6 +8,11 @@ use App\Models\Languages;
 use App\Models\Chapter;
 use App\Models\ChapterInfos;
 use App\Models\TranslatedName;
+use App\Models\Verses;
+use App\Models\Words;
+use App\Models\CharTypes;
+use App\Models\WordTranslation;
+use App\Models\Translations;
 
 class APIController extends Controller
 {
@@ -75,6 +80,28 @@ class APIController extends Controller
                 'data' => 'Language Not Found',
             ];
         }
+    }
+
+    protected function verses($id ,Request $request){
+        $language = 'en';
+        $limit = 10;
+        if(isset($request->language)){
+            $language = $request->language;
+        }
+        if(isset($request->limit)){
+            $limit = $request->limit;
+        }
+        $verses = Verses::select('id','verse_number','chapter_id','verse_key','text_madani',
+        'text_indopak','text_simple','juz_number','hizb_number','rub_number','sajdah','sajdah_number',
+        'page_number')->with('words:id,position,text_madani,text_indopak,text_simple,verse_key,class_name,
+        line_number,page_number,code_hex,code_hex_v3,audio_url')
+        ->with('words.translation:translation_id,language_name,text,resource_name,resource_id')
+        ->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
+        ->with('words.chartype:id,name')
+        ->where('chapter_id',$id)->paginate($limit);
+
+        return ['verses'=>$verses];
+
     }
 
 

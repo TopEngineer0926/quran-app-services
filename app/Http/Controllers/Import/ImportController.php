@@ -226,12 +226,12 @@ class ImportController extends Controller
         $name = Curl::name_verses;
         $results = array();
         $count = 0; // language = 38
-        $path = 'index.html';
+        // $path = 'index.html';
 
-        Storage::disk('public')->put($path, '<html>
-        <head><title>Index of /wbw/</title></head>
-        <body bgcolor="white">
-        <h1>Index of /wbw/</h1><hr><pre>');
+        // Storage::disk('public')->put($path, '<html>
+        // <head><title>Index of /wbw/</title></head>
+        // <body bgcolor="white">
+        // <h1>Index of /wbw/</h1><hr><pre>');
         if ($truncate == 1) {
             Verses::truncate();
             Words::truncate();
@@ -260,7 +260,7 @@ class ImportController extends Controller
                         $verse->rub_number = $result->rub_number;
                         $verse->sajdah = $result->sajdah;
                         $verse->sajdah_number = $result->sajdah_number;
-                        $verse->page_number = $result->verse_number;
+                        $verse->page_number = $result->page_number;
                         $verse->save();
                         foreach ($result->words as $result_word) {
                             if (!Words::find($result_word->id)) {
@@ -282,9 +282,9 @@ class ImportController extends Controller
                                 $word->audio_url = $result_word->audio->url;
                                 $word->save();
 
-                                $file = explode('/', $result_word->audio->url);
-                                $file_name = end($file);
-                                Storage::disk('public')->append($path, '<a href="' . $file_name . '">' . $file_name . '</a>                                         27-Jul-2015 08:47               97809');
+                                // $file = explode('/', $result_word->audio->url);
+                                // $file_name = end($file);
+                                // Storage::disk('public')->append($path, '<a href="' . $file_name . '">' . $file_name . '</a>                                         27-Jul-2015 08:47               97809');
 
                                 if ($result_word->translation != null && !Translations::find($result_word->translation->id)) {
                                     $translation = new Translations;
@@ -327,8 +327,8 @@ class ImportController extends Controller
                 $loop_url = \str_replace("{page}", $page, $loop_url_id);
             }
         }
-        Storage::disk('public')->append($path, '</pre><hr></body>
-        </html>');
+        // Storage::disk('public')->append($path, '</pre><hr></body>
+        // </html>');
         return [
             'status' => $count . " verses successfully inserted",
             'data' => "Not shown intentionally (Would be Too Long)",
@@ -359,5 +359,15 @@ class ImportController extends Controller
             'status' => $count . " indexes created successfully",
             'data' => $words->first()->audio_url." to ".$words->last()->audio_url,
         ];
+    }
+    protected function update_pages()
+    {
+        $verses = Verses::get();
+        foreach($verses as $verse)
+        {
+            $word = Words::where('verse_id',$verse->id)->first();
+            $verse->page_number = $word->page_number;
+            $verse->save();
+        }
     }
 }

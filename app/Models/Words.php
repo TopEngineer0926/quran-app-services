@@ -48,4 +48,30 @@ class Words extends Model
      */
     protected $fillable = ['verse_id', 'chapter_id', 'position', 'text_madani', 'text_indopak', 'text_simple', 'verse_key', 'page_number', 'class_name', 'line_number', 'code_dec', 'code_hex', 'code_hex_v3', 'code_dec_v3', 'char_type_id', 'created_at', 'updated_at', 'pause_name', 'audio_url', 'image_blob', 'image_url', 'token_id', 'topic_id', 'location', 'char_type_name', 'text_imlaei', 'text_uthmani_simple'];
 
+    public function translation()
+    {
+            return $this->hasOneThrough(
+            'App\Models\Translations',
+            'App\Models\WordTranslation',
+            'translation_id', // Foreign key on 2nd table...
+            'id', // Foreign key on 1st table...
+            'id', // Local key on this table...
+            'word_id' // Local key on 2nd table...
+        );
+    }
+    public function transliteration()
+    {
+            return $this->hasOneThrough(
+            'App\Models\Transliterations',
+            'App\Models\WordTransliteration',
+            'transliteration_id', // Foreign key on 2nd table...
+            'id', // Foreign key on 1st table...
+            'id', // Local key on this table...
+            'word_id' // Local key on 2nd table...
+        );
+    }
+    public function chartype()
+    {
+        return $this->hasOne('App\Models\CharTypes','id','char_type_id');
+    }
 }
