@@ -27,5 +27,9 @@ class Languages extends Model
      * @var array
      */
     protected $fillable = ['name', 'iso_code', 'native_name', 'direction', 'es_analyzer_default', 'created_at', 'updated_at'];
-
+    public function translated_name()
+    {
+        return $this->hasOne('App\Models\TranslatedName','language_id','id')->select('language_name','name','language_id')->where('resource_type','languages');
+    }
+//
 }

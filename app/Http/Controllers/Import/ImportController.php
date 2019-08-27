@@ -376,12 +376,18 @@ class ImportController extends Controller
         $path = "test.xml";
         $xml = new XMLWriter();
         $xml->openMemory();
-        //$xml->openUri($path);
+        $xml->openUri($path);
         $xml->startDocument('1.0','utf-8');
-        $xml->startElement('foo');
-        $xml->startElement('data');
-        $xml->writeAttribute('id', '1');
+        $xml->startElement('xml');
+        $xml->startElement('info');
+        $xml->writeElement('version','2.0');
         $xml->endElement();
+        for($i=0;$i<6666;$i++){
+        $xml->startElement('data');
+        $xml->writeElement('data',$i);
+        $xml->endElement();
+        //$xml->writeAttribute('id', $i);
+        }
         $xml->endElement();
         $xml->endDocument();
 
@@ -389,5 +395,22 @@ class ImportController extends Controller
         $xml = null;
 
     return response($content)->header('Content-Type', 'text/xml');
+    }
+    protected function getxml(){
+        $return = array();
+        $path = "test.xml";
+        $xml = simplexml_load_file($path);
+        $datas = $xml->data;
+        $version = $xml->info;
+        echo $version->version;
+        foreach($datas as $data){
+            if($data->data <=10){
+            echo $data->data;
+            }
+        }
+        return $return;
+
+
+
     }
 }

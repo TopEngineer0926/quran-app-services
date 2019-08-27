@@ -18,3 +18,4 @@ Route::get('/verses/{truncate}', 'ImportController@verses')->name('import.verses
 Route::get('/create-wbw-indexes/{truncate}', 'ImportController@create_wbw_index')->name('import.create_wbw_index');
 Route::get('/update-pages', 'ImportController@update_pages')->name('import.update_pages');
 Route::get('/test-xml', 'ImportController@testxml')->name('import.testxml');
+Route::get('/get-xml', 'ImportController@getxml')->name('import.getxml');
