@@ -45,6 +45,6 @@ class Verses extends Model
 
     public function words()
     {
-        return $this->hasMany('App\Models\Words','verse_id','id');
+        return $this->hasMany('App\Models\Words', 'verse_id', 'id')->select(['id', 'verse_id', 'position', 'text_madani', 'text_indopak', 'text_simple', 'verse_key', 'class_name', 'line_number', 'page_number', 'code_hex', 'code_hex_v3', 'audio_url', 'char_type_id']);
     }
 }

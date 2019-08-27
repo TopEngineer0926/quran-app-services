@@ -13,6 +13,7 @@ use App\Models\Words;
 use App\Models\CharTypes;
 use App\Models\WordTranslation;
 use App\Models\Translations;
+use XMLWriter;
 
 class APIController extends Controller
 {
@@ -81,27 +82,34 @@ class APIController extends Controller
             ];
         }
     }
-
+/**
+*Function gets verses for specfic Chapter
+*
+* @author Muhammad Omer Saleh
+* @param int $id: Id for chapter (1 to 114)
+* @param string language: To select translation language 'en' by default (can be array) (Optional)
+* @param int page: page number for current chapter max 50 (Optional)
+* @param int limit: Limit verses for current page (10 by default) (Optional)
+* @return array verses: in single array
+*/
     protected function verses($id ,Request $request){
         $language = 'en';
         $limit = 10;
         if(isset($request->language)){
             $language = $request->language;
         }
-        if(isset($request->limit)){
+        if(isset($request->limit) && $request->limit <=50){
             $limit = $request->limit;
         }
         $verses = Verses::select('id','verse_number','chapter_id','verse_key','text_madani',
         'text_indopak','text_simple','juz_number','hizb_number','rub_number','sajdah','sajdah_number',
-        'page_number')->with('words:id,position,text_madani,text_indopak,text_simple,verse_key,class_name,
-        line_number,page_number,code_hex,code_hex_v3,audio_url')
+        'page_number')->with('words')
         ->with('words.translation:translation_id,language_name,text,resource_name,resource_id')
         ->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
         ->with('words.chartype:id,name')
         ->where('chapter_id',$id)->paginate($limit);
 
         return ['verses'=>$verses];
-
     }
 
 

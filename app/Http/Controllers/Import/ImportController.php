@@ -18,6 +18,7 @@ use App\Models\WordTranslation;
 use App\Models\WordTransliteration;
 use Illuminate\Support\Facades\DB;
 use Storage;
+use XMLWriter;
 
 class ImportController extends Controller
 {
@@ -369,5 +370,24 @@ class ImportController extends Controller
             $verse->page_number = $word->page_number;
             $verse->save();
         }
+    }
+    protected function testxml()
+    {
+        $path = "test.xml";
+        $xml = new XMLWriter();
+        $xml->openMemory();
+        //$xml->openUri($path);
+        $xml->startDocument('1.0','utf-8');
+        $xml->startElement('foo');
+        $xml->startElement('data');
+        $xml->writeAttribute('id', '1');
+        $xml->endElement();
+        $xml->endElement();
+        $xml->endDocument();
+
+        $content = $xml->outputMemory();
+        $xml = null;
+
+    return response($content)->header('Content-Type', 'text/xml');
     }
 }
