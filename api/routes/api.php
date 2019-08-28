@@ -20,4 +20,4 @@ Route::get('/chapters', 'APIController@chapters')->name('api.chapters');
 Route::get('/chapters/{id}/info', 'APIController@chapter_info')->name('api.chapters');
 Route::get('/chapter/{id}', 'APIController@chapter')->name('api.chapter');
 Route::get('/chapters/{id}/verses', 'APIController@verses')->name('api.verses');
-Route::get('/languages', 'APIController@languages')->name('api.languages');
+Route::get('/options/languages', 'APIController@languages')->name('api.languages');
