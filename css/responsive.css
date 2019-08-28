@@ -1,0 +1,74 @@
+/************************
+        Media Queries
+************************/
+/*Large devices*/
+/*Small Devices*/
+@media screen and (max-width: 768px) {
+  header.indexheader .navbar {
+    -ms-flex-wrap: nowrap;
+        flex-wrap: nowrap;
+    padding: 0px;
+  }
+  header.indexheader .navbar .navbar-nav .nav-item a.nav-link {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+        -ms-flex-align: center;
+            align-items: center;
+  }
+  header.indexheader .navbar .navbar-nav .nav-item a.nav-link i {
+    margin-left: 5px;
+  }
+  main.indexmain .container .herobis {
+    width: 50%;
+  }
+  main.indexmain .container .heroiqr {
+    width: 250px;
+  }
+  main.indexmain .container .searchbox {
+    width: 250px;
+  }
+  main.indexmain .container ul.quicklinks {
+    margin-bottom: 16px;
+    margin-left: 0px;
+  }
+  #surahs .container ul.nav {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+  }
+  #surahs .container ul.nav li a.nav-link {
+    font-size: 12px !important;
+  }
+  #footer .container .footer-content-right .logo-social {
+    margin-top: 0px;
+  }
+  header.detailheader .nav-left .nav-left-content {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    width: 100%;
+    -webkit-box-pack: center;
+        -ms-flex-pack: center;
+            justify-content: center;
+  }
+  header.detailheader .nav-left .nav-left-content a.toggler-detail {
+    height: 33px !important;
+    margin-top: 5px;
+    padding: 5px 7px 1px 7px;
+  }
+  header.detailheader .nav-left ul.navbar-nav {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: row;
+            flex-direction: row;
+  }
+  header.detailheader .nav-left ul.navbar-nav form.form-inline {
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+        -ms-flex-flow: row;
+            flex-flow: row;
+  }
+}
+/*# sourceMappingURL=responsive.css.map */

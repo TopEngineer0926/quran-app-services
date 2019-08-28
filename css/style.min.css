@@ -1,0 +1,779 @@
+/**********************
+        Colors
+***********************/
+/**********************
+        Fonts
+***********************/
+@font-face {
+  src: url(../fonts/QCF2001.ttf);
+  font-family: font1;
+}
+
+/***********************
+        Generic
+***********************/
+*:focus {
+  outline: none !important;
+  -webkit-box-shadow: 0 !important;
+          box-shadow: 0 !important;
+}
+
+body {
+  margin: 0px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+header {
+  -webkit-box-shadow: 0px 5px 15px #dbdbdb;
+          box-shadow: 0px 5px 15px #dbdbdb;
+}
+
+header .navbar a.navbartoggler {
+  border: 1px solid #56c0d0;
+  border-radius: 3px;
+  padding: 5px 7px 1px 7px;
+}
+
+header .navbar .fa-bars {
+  color: #56c0d0;
+  font-size: 18px;
+}
+
+header .navbar .fa-bars:hover {
+  cursor: pointer;
+}
+
+header .navbar .fa-times {
+  color: #323232;
+  font-size: 16px;
+}
+
+header .navbar .sidenav {
+  height: 100%;
+  width: 250px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: -265px;
+  background-color: #fff;
+  -webkit-box-shadow: 5px 0px 15px #dbdbdb;
+          box-shadow: 5px 0px 15px #dbdbdb;
+  overflow-x: hidden;
+  -webkit-transition: all 0.4s;
+  transition: all 0.4s;
+}
+
+header .navbar .sidenav .sidenav-upper {
+  margin: 5px 15px;
+  padding: 16px 1px;
+}
+
+header .navbar .sidenav .sidenavmenu a {
+  padding: 8px 8px 8px 15px;
+  text-decoration: none;
+  font-size: 16px;
+  color: #ababab;
+  display: block;
+  -webkit-transition: all 0.4s;
+  transition: all 0.4s;
+}
+
+header .navbar .sidenav .sidenavmenu a:hover {
+  color: #fff;
+  background-color: #56c0d0;
+}
+
+header .navbar .sidenav .sidenavmenu a:nth-of-type(1) {
+  margin-top: 10px;
+}
+
+header .navbar .sidenav .sidenavmenu a i {
+  width: 25px;
+  text-align: center;
+  margin-right: 5px;
+}
+
+header .navbar ul {
+  list-style-type: none;
+  margin-bottom: 0px;
+  font-weight: 500;
+}
+
+header .navbar ul li {
+  padding: 0.5rem;
+  font-size: 14px;
+}
+
+header .navbar ul li a {
+  color: #56c0d0;
+  text-decoration: none;
+  margin: 0px;
+}
+
+header .navbar ul li .dropdown-menu {
+  left: -35%;
+}
+
+header .navbar ul li .dropdown-menu .dropdown-item {
+  color: #56c0d0;
+}
+
+header .navbar ul li .dropdown-menu .dropdown-item:hover {
+  color: #fff;
+  background-color: #56c0d0;
+  cursor: pointer;
+}
+
+header .navbar ul form input[type='text'] {
+  background: #f4f4f4 !important;
+  color: #56c0d0 !important;
+  font-weight: 500 !important;
+  border: none;
+  outline: none;
+}
+
+header .navbar ul form ::-webkit-input-placeholder {
+  color: #56c0d0;
+  font-weight: 500;
+  font-size: 14px;
+  opacity: 1;
+}
+
+header .navbar ul form :-ms-input-placeholder {
+  color: #56c0d0;
+  font-weight: 500;
+  font-size: 14px;
+  opacity: 1;
+}
+
+header .navbar ul form ::-ms-input-placeholder {
+  color: #56c0d0;
+  font-weight: 500;
+  font-size: 14px;
+  opacity: 1;
+}
+
+header .navbar ul form ::placeholder {
+  color: #56c0d0;
+  font-weight: 500;
+  font-size: 14px;
+  opacity: 1;
+}
+
+header .navbar ul form :-ms-input-placeholder {
+  color: #56c0d0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+header .navbar ul form ::-ms-input-placeholder {
+  color: #56c0d0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+header .navbar ul form .fa-search {
+  padding: 11px;
+  color: #fff;
+  background-color: #56c0d0;
+  border: transparent;
+}
+
+header .navbar .sidenavright {
+  height: 100%;
+  width: 350px;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  right: -360px;
+  background-color: #fff;
+  -webkit-box-shadow: -5px 0px 10px 0px #dbdbdb;
+          box-shadow: -5px 0px 10px 0px #dbdbdb;
+  overflow-x: hidden;
+  -webkit-transition: all 0.4s;
+  transition: all 0.4s;
+}
+
+header .navbar .sidenavright .fas {
+  color: #ababab;
+  width: 20px;
+}
+
+header .navbar .sidenavright .sidenavright-upper h6 {
+  margin: 16px 0px;
+  color: #ababab;
+}
+
+header .navbar .sidenavright .sidenavright-upper2 a {
+  color: #ababab;
+  display: block;
+  padding: 5px;
+}
+
+header .navbar .sidenavright .sidenavright-upper2 a i {
+  width: 20px;
+}
+
+header .navbar .sidenavright .sidenavright-upper2 a:hover {
+  text-decoration: none;
+}
+
+header .navbar .sidenavright .sidenavright-middle a {
+  color: #ababab;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+header .navbar .sidenavright .sidenavright-middle a i {
+  width: 20px;
+}
+
+header .navbar .sidenavright .sidenavright-middle .sidenavright-middle-collapsed-content ul {
+  list-style-type: circle;
+}
+
+header .navbar .sidenavright .sidenavright-lower h6 {
+  margin: 16px 0px;
+  color: #ababab;
+}
+
+header .navbardetail {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+footer {
+  background-color: #323232;
+}
+
+footer .container {
+  padding: 0px 32px;
+}
+
+footer .container .footer-content-left p,
+footer .container .footer-content-left ul,
+footer .container .footer-content-left li,
+footer .container .footer-content-left a {
+  margin: 0px;
+  padding: 0px;
+  text-decoration: none;
+  color: #fff;
+}
+
+footer .container .footer-content-left ul {
+  list-style-type: none;
+  min-height: 180px;
+}
+
+footer .container .footer-content-left ul li {
+  margin-bottom: 15px;
+}
+
+footer .container .footer-content-left ul li a:hover {
+  color: #56c0d0;
+}
+
+footer .container .footer-content-left .lead {
+  font-size: 16px;
+  font-weight: bold;
+  min-height: 30px;
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+
+footer .container .footer-content-right .logo-social {
+  margin-top: 40px;
+  margin-bottom: 10px;
+  min-height: 30px;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons {
+  list-style-type: none;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(1) {
+  margin-right: 20px;
+  margin-top: 5px;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(1) a {
+  color: #fff;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(1) a:hover {
+  color: #3b5998;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(2) {
+  margin-right: 20px;
+  margin-top: 5px;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(2) a {
+  color: #fff;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(2) a:hover {
+  color: #1da1f2;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(3) {
+  margin-right: 20px;
+  margin-top: 5px;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(3) a {
+  color: #fff;
+}
+
+footer .container .footer-content-right .logo-social ul.social-icons li:nth-of-type(3) a:hover {
+  color: #8a3ab9;
+}
+
+footer .container .footer-text {
+  color: #fff;
+  font-size: 14px;
+}
+
+.arabic {
+  font-family: font1;
+  font-size: 3.5rem;
+  font-weight: 100;
+  color: #000;
+}
+
+.arabic-index {
+  font-family: font1;
+  font-size: 45px;
+  font-weight: 300;
+  color: #56c0d0;
+  float: right;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+/********************************
+    Classes for Javascript
+*********************************/
+.mobileFooterContentLeft .col-3 {
+  margin: 0px;
+  padding: 2px;
+}
+
+.mobileFooterContentLeft .col-3 p {
+  text-align: center;
+}
+
+.mobileFooterContentLeft .col-3:nth-of-type(3) p {
+  margin-left: 50%;
+}
+
+.mobileFooterContentLeft .col-3 li {
+  text-align: center;
+}
+
+.mobileFooterContentLeft .col-3 li a.small {
+  font-size: 0.5em;
+}
+
+.sidenavvisible {
+  left: 0px !important;
+}
+
+.sidenavvisibleright {
+  right: 0px !important;
+}
+
+.col,
+.col-1,
+.col-10,
+.col-11,
+.col-12,
+.col-2,
+.col-3,
+.col-4,
+.col-5,
+.col-6,
+.col-7,
+.col-8,
+.col-9,
+.col-auto,
+.col-lg,
+.col-lg-1,
+.col-lg-10,
+.col-lg-11,
+.col-lg-12,
+.col-lg-2,
+.col-lg-3,
+.col-lg-4,
+.col-lg-5,
+.col-lg-6,
+.col-lg-7,
+.col-lg-8,
+.col-lg-9,
+.col-lg-auto,
+.col-md,
+.col-md-1,
+.col-md-10,
+.col-md-11,
+.col-md-12,
+.col-md-2,
+.col-md-3,
+.col-md-4,
+.col-md-5,
+.col-md-6,
+.col-md-7,
+.col-md-8,
+.col-md-9,
+.col-md-auto,
+.col-sm,
+.col-sm-1,
+.col-sm-10,
+.col-sm-11,
+.col-sm-12,
+.col-sm-2,
+.col-sm-3,
+.col-sm-4,
+.col-sm-5,
+.col-sm-6,
+.col-sm-7,
+.col-sm-8,
+.col-sm-9,
+.col-sm-auto,
+.col-xl,
+.col-xl-1,
+.col-xl-10,
+.col-xl-11,
+.col-xl-12,
+.col-xl-2,
+.col-xl-3,
+.col-xl-4,
+.col-xl-5,
+.col-xl-6,
+.col-xl-7,
+.col-xl-8,
+.col-xl-9,
+.col-xl-auto {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+/***********************
+        Index Css
+************************/
+main.indexmain .searchbox {
+  width: 584px;
+  margin: auto;
+  position: relative;
+}
+
+main.indexmain .searchbox input[type='text'] {
+  padding: 25px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #56c0d0;
+  border-radius: 3px;
+  float: left;
+  width: 100%;
+  height: 58px;
+  position: relative;
+  background: #56c0d0;
+  color: #fff;
+  border-right: none;
+}
+
+main.indexmain .searchbox ::-webkit-input-placeholder {
+  color: #fff;
+  opacity: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+main.indexmain .searchbox :-ms-input-placeholder {
+  color: #fff;
+  opacity: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+main.indexmain .searchbox ::-ms-input-placeholder {
+  color: #fff;
+  opacity: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+main.indexmain .searchbox ::placeholder {
+  color: #fff;
+  opacity: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+main.indexmain .searchbox :-ms-input-placeholder {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+main.indexmain .searchbox ::-ms-input-placeholder {
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+main.indexmain .searchbox .fa-search {
+  position: absolute;
+  right: 0;
+  padding: 20px;
+  color: #fff;
+}
+
+main.indexmain .container ul.quicklinks {
+  margin-bottom: 0px;
+  margin-left: -39px;
+  color: #ababab;
+}
+
+main.indexmain .container ul.quicklinks .btn {
+  padding: 6px 10px;
+}
+
+main.indexmain .container ul.quicklinks .btn a {
+  color: #56c0d0;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+main.indexmain .container ul.quicklinks .btn a:hover {
+  color: #459aa7;
+  text-decoration: none;
+}
+
+main.indexmain .container ul.quicklinks .disabled {
+  font-size: 12px;
+  font-weight: 500;
+  color: #323232;
+}
+
+#surahs .container .nav {
+  color: #ababab;
+}
+
+#surahs .container .nav .nav-item .nav-link {
+  color: #ababab;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 25px;
+}
+
+#surahs .container .nav .nav-item .nav-link .badge {
+  color: #fff;
+  background-color: #ababab;
+  border-radius: 50%;
+  height: 22px;
+  padding: 5px;
+  line-height: 13px;
+}
+
+#surahs .container .nav .nav-item .nav-link.active {
+  color: #56c0d0;
+}
+
+#surahs .container .nav .nav-item .nav-link.active .badge {
+  color: #fff;
+  background-color: #56c0d0;
+}
+
+#surahs .container hr {
+  margin-left: 15px;
+  margin-right: 15px;
+}
+
+#surahs .container .tab-content .tab-pane p.manzil-text-first {
+  color: #ababab;
+  margin-top: 65px;
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+
+#surahs .container .tab-content .tab-pane p.manzil-text {
+  color: #ababab;
+  margin-top: 35px;
+  margin-bottom: 30px;
+  font-size: 14px;
+}
+
+#surahs .container .tab-content .tab-pane .row a {
+  text-decoration: none;
+  cursor: pointer;
+  margin: 0px;
+  padding: 0px;
+}
+
+#surahs .container .tab-content .tab-pane .row a .surahbox {
+  border: 1px solid #dbdbdb;
+  border-radius: 3px;
+  padding: 6px;
+  margin-bottom: 30px;
+}
+
+#surahs .container .tab-content .tab-pane .row a .surahbox .surah-content-left b {
+  color: #ababab;
+  font-size: 14px;
+}
+
+#surahs .container .tab-content .tab-pane .row a .surahbox .surah-content-left p {
+  color: #56c0d0;
+  margin-top: 10px;
+  margin-bottom: 0px;
+  font-size: 12px;
+}
+
+#surahs .container .tab-content .tab-pane .row a .surahbox .surah-content-left p .lead {
+  font-weight: bold;
+  font-size: 16px;
+}
+
+#surahs .container .tab-content .tab-pane .row a .surahbox .surah-content-right {
+  width: 100px;
+}
+
+#surahs .container .tab-content .tab-pane .row a .surahbox .surah-content-right p {
+  margin-bottom: 0px;
+}
+
+#surahs .container .tab-content .tab-pane .row a .surahbox .surah-content-right .verse-count {
+  color: #dbdbdb;
+  float: right;
+  font-size: 14px;
+  margin-bottom: 0px;
+}
+
+#surahs .container .tab-content .tab-pane .row:nth-last-of-type(1) {
+  margin-bottom: 40px;
+}
+
+/***********************
+        Details Css
+***********************/
+main.detailmain .ayatboxouter .ayatrefbox {
+  max-height: 265px;
+  min-width: 90px;
+  background-color: #f4f4f4;
+  margin: 40px 0px;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .ref {
+  padding: 17px 17px;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .ref .ref-group {
+  background-color: #56c0d0;
+  height: 40px;
+  color: #fff;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .ref .ref-group a {
+  color: inherit;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .plycpy {
+  padding: 17px 0px;
+  line-height: 36px;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .plycpy .plycpy-group {
+  font-size: 14px;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .plycpy .plycpy-group a {
+  color: #ababab;
+  text-decoration: none;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .plycpy .plycpy-group a:hover {
+  color: #56c0d0;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .social {
+  padding: 14px 0px;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .social .social-group {
+  margin: 14px;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .social .social-group a {
+  background-color: #dbdbdb;
+  border-radius: 50%;
+  padding: 14px;
+  position: relative;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .social .social-group a i {
+  position: absolute;
+  -webkit-transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 0.9em;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .social .social-group a.facustomfacebook:hover {
+  background-color: #3b5998;
+}
+
+main.detailmain .ayatboxouter .ayatrefbox .social .social-group a.facustomtwitter:hover {
+  background-color: #1da1f2;
+}
+
+main.detailmain .ayatboxouter .ayatbox {
+  min-height: 265px;
+  margin: 40px 0px;
+  padding: 45px;
+  position: relative;
+}
+
+main.detailmain .ayatboxouter .ayatbox b:hover {
+  color: #56c0d0;
+}
+
+main.detailmain .ayatboxouter .ayatbox .translation-box {
+  line-height: 30px;
+}
+
+main.detailmain .ayatboxouter .ayatbox .translation-box a {
+  text-transform: uppercase;
+  font-size: 12px;
+  color: #56c0d0;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+main.detailmain .ayatboxouter .ayatbox .translation-box p {
+  color: #ababab;
+  font-size: 16px;
+}
+
+main.detailmain .ayatboxouter .ayatbox .bayyinah {
+  text-decoration: none;
+  color: #56c0d0;
+  font-weight: 500;
+  font-size: 12px;
+  position: absolute;
+  left: 45px;
+  bottom: 20px;
+}
+
+main.detailmain .ayatboxouter .ayatbox .bayyinah:hover {
+  color: #459aa7;
+}
+
+main.detailmain hr:nth-last-of-type(1) {
+  display: none;
+}
