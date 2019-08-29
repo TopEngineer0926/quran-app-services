@@ -230,12 +230,6 @@ class ImportController extends Controller
         $name = Curl::name_verses;
         $results = array();
         $count = 0; // language = 38
-        // $path = 'index.html';
-
-        // Storage::disk('public')->put($path, '<html>
-        // <head><title>Index of /wbw/</title></head>
-        // <body bgcolor="white">
-        // <h1>Index of /wbw/</h1><hr><pre>');
         if ($truncate == 1) {
             Verses::truncate();
             Words::truncate();
@@ -339,7 +333,7 @@ class ImportController extends Controller
         ];
     }
 
-    protected function create_wbw_index($truncate = 0)
+    protected function create_wbw_index($truncate = 0) // not needed anymore
     {
         if ($truncate == 1) {
             $path = 'index.html';
@@ -364,7 +358,7 @@ class ImportController extends Controller
             'data' => $words->first()->audio_url . " to " . $words->last()->audio_url,
         ];
     }
-    protected function update_pages()
+    protected function update_pages() // not needed anyomore
     {
         $verses = Verses::get();
         foreach ($verses as $verse) {
@@ -415,7 +409,7 @@ class ImportController extends Controller
     }
 
 
-    protected function update_chapters()
+    protected function update_chapters() // not needed anymore
     {
         $quran_chapters = QuranChapter::get();
         $loop = 1;
@@ -434,16 +428,54 @@ class ImportController extends Controller
 
     protected function audiofiles(Request $request)
     {
-        if (isset($request->truncate)) { }
-        $path = array();
+        $curl = new Curl;
+        $url = Curl::url_audio_files;
+        $name = Curl::name_audio_files;
+        $results = array();
+        $count = 0;
+        $paths = array();
         $recitations = Recitations::get();
         foreach ($recitations as $recitation) {
-            $path[$recitation->id] = $recitation->file_name;
+            $paths[$recitation->id] = $recitation->file_name;
+            if (isset($request->truncate)) {
+                foreach($paths as $path){
+                    Storage::disk('public')->put($path,'');
+                }
+            }
+
         }
-        return $path;
+        $loop_url = \str_replace("{id}", 1, $url);
+        $loop_url = \str_replace("{verse_id}", 1, $loop_url);
+        $results = $curl->curl($loop_url, $name);
+        $loop =1 ;
+        $contents = array();
+        foreach($results as $result)
+        {
+            $xml = new XMLWriter();
+            $xml->openMemory();
+            $xml->openUri($paths[$loop]);
+            $xml->startDocument('1.0', 'utf-8'); //start document [1]
+            $xml->startElement('xml'); //start xml tag [2]
+            $xml->startElement('information'); //start information tag [3]
+            $xml->writeElement('reciter_id', $loop); //write element reciter id
+            $xml->writeElement('reciter_name', $recitations->where('id',$loop)->first()->reciter_name); //write element reciter_name
+            $xml->writeElement('reciter_style_id', 1); //write element
+            $xml->writeElement('reciter_style_name', 'style'); //write element
+            $xml->writeElement('format', $result->format); //write element
+            $xml->writeElement('base_url', 'base'); //write element
+            $xml->endElement(); // end information tag [3]
+            $xml->endElement(); // end xml tag [2]
+            $xml->endDocument(); //end document [1]
+
+            $content = $xml->outputMemory();
+            array_push($contents,$content);
+            $xml = null;
+            $loop++;
+        }
+        return response($contents)->header('Content-Type', 'text/xml');
     }
 
-    protected function chapter_info_description()
+    protected function chapter_info_description() //not needed any more
     {
         $chapter_infos = ChapterInfo::select('id','text')->get();
         $result = array();

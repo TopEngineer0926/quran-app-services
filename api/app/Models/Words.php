@@ -42,11 +42,15 @@ class Words extends Model
      * @var bool
      */
     public $incrementing = false;
+    // function __construct(){
+    //     $this->code_hex = html_entity_decode($this->code_hex, ENT_NOQUOTES);
+    // }
 
     /**
      * @var array
      */
     protected $fillable = ['verse_id', 'chapter_id', 'position', 'text_madani', 'text_indopak', 'text_simple', 'verse_key', 'page_number', 'class_name', 'line_number', 'code_dec', 'code_hex', 'code_hex_v3', 'code_dec_v3', 'char_type_id', 'created_at', 'updated_at', 'pause_name', 'audio_url', 'image_blob', 'image_url', 'token_id', 'topic_id', 'location', 'char_type_name', 'text_imlaei', 'text_uthmani_simple'];
+
 
     public function translation()
     {

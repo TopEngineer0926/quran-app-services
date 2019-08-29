@@ -160,7 +160,11 @@ class APIController extends Controller
             ->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
             ->with('words.chartype:id,name')
             ->where('chapter_id', $id)->where('verse_number', '>=', $offset)->paginate($limit);
-
+        foreach($verses as $verse){
+            foreach($verse->words as $word){
+                $word->code_hex = html_entity_decode($word->code_hex, ENT_NOQUOTES);
+            }
+        }
         return ['verses' => $verses];
     }
     /**

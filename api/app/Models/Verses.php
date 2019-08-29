@@ -36,6 +36,8 @@ class Verses extends Model
      *
      * @var bool
      */
+
+
     public $incrementing = false;
 
     /**
