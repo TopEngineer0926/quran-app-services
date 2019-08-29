@@ -18,6 +18,7 @@ use App\Models\WordTranslation;
 use App\Models\WordTransliteration;
 use App\Models\Recitations;
 use App\Models\QuranChapter;
+use DOMDocument;
 use Illuminate\Support\Facades\DB;
 use Storage;
 use XMLWriter;
@@ -349,7 +350,7 @@ class ImportController extends Controller
         }
         $words = Words::get();
         $count = 0;
-        foreach($words as $word){
+        foreach ($words as $word) {
             $file = explode('/', $word->audio_url);
             $file_name = end($file);
             Storage::disk('public')->append($path, '<a href="' . $file_name . '">' . $file_name . '</a>                                         27-Jul-2015 08:47               97809');
@@ -360,15 +361,14 @@ class ImportController extends Controller
 
         return [
             'status' => $count . " indexes created successfully",
-            'data' => $words->first()->audio_url." to ".$words->last()->audio_url,
+            'data' => $words->first()->audio_url . " to " . $words->last()->audio_url,
         ];
     }
     protected function update_pages()
     {
         $verses = Verses::get();
-        foreach($verses as $verse)
-        {
-            $word = Words::where('verse_id',$verse->id)->first();
+        foreach ($verses as $verse) {
+            $word = Words::where('verse_id', $verse->id)->first();
             $verse->page_number = $word->page_number;
             $verse->save();
         }
@@ -379,16 +379,16 @@ class ImportController extends Controller
         $xml = new XMLWriter();
         $xml->openMemory();
         $xml->openUri($path);
-        $xml->startDocument('1.0','utf-8');
+        $xml->startDocument('1.0', 'utf-8');
         $xml->startElement('xml');
         $xml->startElement('info');
-        $xml->writeElement('version','2.0');
+        $xml->writeElement('version', '2.0');
         $xml->endElement();
-        for($i=0;$i<6666;$i++){
-        $xml->startElement('data');
-        $xml->writeElement('data',$i);
-        $xml->endElement();
-        //$xml->writeAttribute('id', $i);
+        for ($i = 0; $i < 6666; $i++) {
+            $xml->startElement('data');
+            $xml->writeElement('data', $i);
+            $xml->endElement();
+            //$xml->writeAttribute('id', $i);
         }
         $xml->endElement();
         $xml->endDocument();
@@ -396,49 +396,82 @@ class ImportController extends Controller
         $content = $xml->outputMemory();
         $xml = null;
 
-    return response($content)->header('Content-Type', 'text/xml');
+        return response($content)->header('Content-Type', 'text/xml');
     }
-    protected function getxml(){
+    protected function getxml()
+    {
         $return = array();
         $path = "test.xml";
         $xml = simplexml_load_file($path);
         $datas = $xml->data;
         $version = $xml->info;
         echo $version->version;
-        foreach($datas as $data){
-            if($data->data <=10){
-            echo $data->data;
+        foreach ($datas as $data) {
+            if ($data->data <= 10) {
+                echo $data->data;
             }
         }
         return $return;
     }
 
-    protected function audiofiles(Request $request)
-    {
-        if(isset($request->truncate)){
 
-        }
-        $path = array();
-        $recitations = Recitations::get();
-        foreach ($recitations as $recitation){
-            $path[$recitation->id] = $recitation->file_name;
-        }
-        return $path;
-    }
-    protected function update_chapters(){
+    protected function update_chapters()
+    {
         $quran_chapters = QuranChapter::get();
         $loop = 1;
         $result = array();
         $chapters = Chapter::get();
-        foreach($quran_chapters as $chapter){
+        foreach ($quran_chapters as $chapter) {
 
-                //echo $chapter->article_informaltable_tgroup_tbody_row_entry_para.'\n';
-                array_push($result,$chapter->name);
-                $chapter_name = $chapters->where('id',$chapter->id)->first();
-                $chapter_name->name_arabic = $chapter->name;
-                $chapter_name->save();
-
+            //echo $chapter->article_informaltable_tgroup_tbody_row_entry_para.'\n';
+            array_push($result, $chapter->name);
+            $chapter_name = $chapters->where('id', $chapter->id)->first();
+            $chapter_name->name_arabic = $chapter->name;
+            $chapter_name->save();
         }
         return $result;
+    }
+
+    protected function audiofiles(Request $request)
+    {
+        if (isset($request->truncate)) { }
+        $path = array();
+        $recitations = Recitations::get();
+        foreach ($recitations as $recitation) {
+            $path[$recitation->id] = $recitation->file_name;
+        }
+        return $path;
+    }
+
+    protected function chapter_info_description()
+    {
+        $chapter_infos = ChapterInfo::select('id','text')->get();
+        $result = array();
+        $dom = new DOMDocument();
+        $loop = 0;
+
+        foreach ($chapter_infos as $chapter_info) {
+            //     preg_match_all('/\<\w[^<>]*?\>([^<>]+?\<\/\w+?\>)?|\<\/\w+?\>/i', $chapter_info->text, $matches);
+            $nodes = array();
+            $dom->loadHTML($chapter_info->text);
+            foreach ($dom->getElementsByTagName('*') as $element) {
+                if ($element->tagName != "html"  && $element->tagName != "body") {
+                    $node = array();
+                    $node = [$element->tagName => $element->nodeValue];
+                    array_push($nodes, $node);
+                }
+            }
+            $chapter_info->text = json_encode($nodes);
+            $chapter_info->save();
+            $loop++;
+        }
+
+
+
+        return [
+            'status' => 'success',
+            'data' => $loop . ' data changed',
+            //'result' => $result
+        ];
     }
 }

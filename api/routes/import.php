@@ -21,3 +21,4 @@ Route::get('/test-xml', 'ImportController@testxml')->name('import.testxml');
 Route::get('/get-xml', 'ImportController@getxml')->name('import.getxml');
 Route::get('/audio-files', 'ImportController@audiofiles')->name('import.audiofiles');
 Route::get('/update-chapters', 'ImportController@update_chapters')->name('import.update_chapters');
+Route::get('/chapter-info-description', 'ImportController@chapter_info_description')->name('import.chapter_info_description');

@@ -73,6 +73,7 @@ class APIController extends Controller
         $language = Languages::where('iso_code', $language)->first();
         if ($language) {
             $chapter_info = ChapterInfos::where('chapter_id', $id)->where('language_id', $language->id)->first();
+            $chapter_info->text = json_decode($chapter_info->text);
             return ['chapter_info' => $chapter_info];
         } else {
             return [
