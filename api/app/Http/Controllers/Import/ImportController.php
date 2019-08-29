@@ -16,6 +16,8 @@ use App\Models\Translations;
 use App\Models\Transliterations;
 use App\Models\WordTranslation;
 use App\Models\WordTransliteration;
+use App\Models\Recitations;
+use App\Models\QuranChapter;
 use Illuminate\Support\Facades\DB;
 use Storage;
 use XMLWriter;
@@ -409,8 +411,34 @@ class ImportController extends Controller
             }
         }
         return $return;
+    }
 
+    protected function audiofiles(Request $request)
+    {
+        if(isset($request->truncate)){
 
+        }
+        $path = array();
+        $recitations = Recitations::get();
+        foreach ($recitations as $recitation){
+            $path[$recitation->id] = $recitation->file_name;
+        }
+        return $path;
+    }
+    protected function update_chapters(){
+        $quran_chapters = QuranChapter::get();
+        $loop = 1;
+        $result = array();
+        $chapters = Chapter::get();
+        foreach($quran_chapters as $chapter){
 
+                //echo $chapter->article_informaltable_tgroup_tbody_row_entry_para.'\n';
+                array_push($result,$chapter->name);
+                $chapter_name = $chapters->where('id',$chapter->id)->first();
+                $chapter_name->name_arabic = $chapter->name;
+                $chapter_name->save();
+
+        }
+        return $result;
     }
 }
