@@ -1,0 +1,789 @@
+/**********************
+        Colors
+***********************/
+$colors: (
+  border: #a6a6a6,
+  primary: #56c0d0,
+  text: #ababab,
+  bluish: #265fa6,
+  footer: #323232,
+  nocolor: #fff,
+  primarydark: #459aa7,
+  dullcolor: #dbdbdb,
+  ayatrefbg: #f4f4f4,
+  black: #000,
+  facebook: #3b5998,
+  twitter: #1da1f2,
+  instagram: #8a3ab9
+);
+
+@function color($color-name) {
+  @return map-get($colors, $color-name);
+}
+
+/**********************
+        Fonts
+***********************/
+@font-face {
+  src: url(../fonts/QCF2001.ttf);
+  font-family: font1;
+}
+
+/***********************
+        Generic
+***********************/
+*:focus {
+  outline: none !important;
+  box-shadow: 0 !important;
+}
+
+body {
+  margin: 0px;
+  font-family: 'Montserrat', sans-serif;
+}
+
+header {
+  box-shadow: 0px 5px 15px color(dullcolor);
+
+  .navbar {
+    a.navbartoggler {
+      border: 1px solid color(primary);
+      border-radius: 3px;
+      padding: 5px 7px 1px 7px;
+    }
+    a.toggler-detail {
+      padding: 5px 3px 3px 7px;
+    }
+    .fa-bars {
+      color: color(primary);
+      font-size: 18px;
+    }
+
+    .fa-bars:hover {
+      cursor: pointer;
+    }
+
+    .fa-times {
+      color: color(footer);
+      font-size: 16px;
+    }
+
+    .sidenav {
+      height: 100%;
+      width: 250px;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      left: -265px;
+      background-color: #fff;
+      box-shadow: 5px 0px 15px #dbdbdb;
+      overflow-x: hidden;
+      transition: all 0.8s;
+      .sidenav-upper {
+        margin: 5px 15px;
+        padding: 16px 1px;
+      }
+      .sidenavmenu {
+        a {
+          padding: 8px 8px 8px 15px;
+          text-decoration: none;
+          font-size: 16px;
+          color: color(text);
+          display: block;
+          transition: all 0.8s;
+        }
+
+        a:hover {
+          color: color(nocolor);
+          background-color: color(primary);
+        }
+
+        a:nth-of-type(1) {
+          margin-top: 10px;
+        }
+
+        a {
+          i {
+            width: 25px;
+            text-align: center;
+            margin-right: 5px;
+          }
+        }
+      }
+    }
+
+    ul {
+      list-style-type: none;
+      margin-bottom: 0px;
+      font-weight: 500;
+
+      li {
+        padding: 0.5rem;
+        font-size: 14px;
+        a {
+          color: color(primary);
+          text-decoration: none;
+          margin: 0px;
+        }
+        .dropdown-menu {
+          left: -35%;
+          .dropdown-item {
+            color: color(primary);
+          }
+          .dropdown-item:hover {
+            color: color(nocolor);
+            background-color: color(primary);
+            cursor: pointer;
+          }
+        }
+      }
+      form {
+        input[type='text'] {
+          background: color(ayatrefbg) !important;
+          color: color(primary) !important;
+          font-weight: 500 !important;
+          border: none;
+          outline: none;
+        }
+
+        ::placeholder {
+          color: color(primary);
+          font-weight: 500;
+          font-size: 14px;
+          opacity: 1;
+        }
+
+        :-ms-input-placeholder {
+          color: color(primary);
+          font-weight: 500;
+          font-size: 14px;
+        }
+
+        ::-ms-input-placeholder {
+          color: color(primary);
+          font-weight: 500;
+          font-size: 14px;
+        }
+        .fa-search {
+          padding: 11px;
+          color: color(nocolor);
+          background-color: color(primary);
+          border: transparent;
+        }
+      }
+    }
+
+    .sidenavright {
+      height: 100%;
+      width: 350px;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      right: -360px;
+      background-color: #fff;
+      box-shadow: -5px 0px 10px 0px #dbdbdb;
+      overflow-x: hidden;
+      transition: all 0.8s;
+
+      .fas {
+        color: color(text);
+        width: 20px;
+      }
+      .sidenavright-upper {
+        h6 {
+          margin: 16px 0px;
+          color: color(text);
+        }
+      }
+      .sidenavright-upper2 {
+        a {
+          color: color(text);
+          display: block;
+          padding: 5px;
+          i {
+            width: 20px;
+          }
+        }
+        a:hover {
+          text-decoration: none;
+        }
+      }
+      .sidenavright-middle {
+        a {
+          color: color(text);
+          cursor: pointer;
+          margin-top: 20px;
+          i {
+            width: 20px;
+          }
+        }
+        .sidenavright-middle-collapsed-content {
+          ul {
+            list-style-type: circle;
+          }
+        }
+      }
+      .sidenavright-lower {
+        h6 {
+          margin: 16px 0px;
+          color: color(text);
+        }
+      }
+      .sidenavright-bottom-help {
+        display: block;
+      }
+    }
+  }
+
+  .navbardetail {
+    padding-top: 0px;
+    padding-bottom: 0px;
+  }
+}
+
+footer {
+  background-color: color(footer);
+
+  .container {
+    padding: 0px 32px;
+
+    .footer-content-left {
+      p,
+      ul,
+      li,
+      a {
+        margin: 0px;
+        padding: 0px;
+        text-decoration: none;
+        color: color(nocolor);
+      }
+
+      ul {
+        list-style-type: none;
+        min-height: 180px;
+
+        li {
+          margin-bottom: 15px;
+
+          a:hover {
+            color: color(primary);
+          }
+        }
+      }
+
+      .lead {
+        font-size: 16px;
+        font-weight: bold;
+        min-height: 30px;
+        margin-top: 40px;
+        margin-bottom: 10px;
+      }
+    }
+
+    .footer-content-right {
+      .logo-social {
+        margin-top: 40px;
+        margin-bottom: 10px;
+        min-height: 30px;
+
+        ul.social-icons {
+          list-style-type: none;
+
+          li:nth-of-type(1) {
+            margin-right: 20px;
+            margin-top: 5px;
+
+            a {
+              color: color(nocolor);
+            }
+
+            a:hover {
+              color: color(facebook);
+            }
+          }
+
+          li:nth-of-type(2) {
+            margin-right: 20px;
+            margin-top: 5px;
+
+            a {
+              color: color(nocolor);
+            }
+
+            a:hover {
+              color: color(twitter);
+            }
+          }
+
+          li:nth-of-type(3) {
+            margin-right: 20px;
+            margin-top: 5px;
+
+            a {
+              color: color(nocolor);
+            }
+
+            a:hover {
+              color: color(instagram);
+            }
+          }
+        }
+      }
+    }
+
+    .footer-text {
+      color: color(nocolor);
+      font-size: 14px;
+    }
+  }
+}
+
+.arabic {
+  font-family: font1;
+  font-size: 3.5rem;
+  font-weight: 100;
+  color: color(black);
+}
+
+.arabic-index {
+  font-family: font1;
+  font-size: 45px;
+  font-weight: 300;
+  color: color(primary);
+  float: right;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+/********************************
+    Classes for Javascript
+*********************************/
+.mobileFooterContentLeft {
+  .col-3 {
+    margin: 0px;
+    padding: 2px;
+
+    p {
+      text-align: center;
+    }
+  }
+
+  .col-3:nth-of-type(3) {
+    p {
+      margin-left: 50%;
+    }
+  }
+
+  .col-3 {
+    li {
+      text-align: center;
+
+      a.small {
+        font-size: 0.5em;
+      }
+    }
+  }
+}
+
+.sidenavvisible {
+  left: 0px !important;
+}
+.sidenavvisibleright {
+  right: 0px !important;
+}
+
+.col,
+.col-1,
+.col-10,
+.col-11,
+.col-12,
+.col-2,
+.col-3,
+.col-4,
+.col-5,
+.col-6,
+.col-7,
+.col-8,
+.col-9,
+.col-auto,
+.col-lg,
+.col-lg-1,
+.col-lg-10,
+.col-lg-11,
+.col-lg-12,
+.col-lg-2,
+.col-lg-3,
+.col-lg-4,
+.col-lg-5,
+.col-lg-6,
+.col-lg-7,
+.col-lg-8,
+.col-lg-9,
+.col-lg-auto,
+.col-md,
+.col-md-1,
+.col-md-10,
+.col-md-11,
+.col-md-12,
+.col-md-2,
+.col-md-3,
+.col-md-4,
+.col-md-5,
+.col-md-6,
+.col-md-7,
+.col-md-8,
+.col-md-9,
+.col-md-auto,
+.col-sm,
+.col-sm-1,
+.col-sm-10,
+.col-sm-11,
+.col-sm-12,
+.col-sm-2,
+.col-sm-3,
+.col-sm-4,
+.col-sm-5,
+.col-sm-6,
+.col-sm-7,
+.col-sm-8,
+.col-sm-9,
+.col-sm-auto,
+.col-xl,
+.col-xl-1,
+.col-xl-10,
+.col-xl-11,
+.col-xl-12,
+.col-xl-2,
+.col-xl-3,
+.col-xl-4,
+.col-xl-5,
+.col-xl-6,
+.col-xl-7,
+.col-xl-8,
+.col-xl-9,
+.col-xl-auto {
+  position: relative;
+  width: 100%;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+/***********************
+        Index Css
+************************/
+
+main.indexmain {
+  .searchbox {
+    width: 584px;
+    margin: auto;
+    position: relative;
+
+    input[type='text'] {
+      padding: 25px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid color(primary);
+      border-radius: 3px;
+      float: left;
+      width: 100%;
+      height: 58px;
+      position: relative;
+      background: color(primary);
+      color: color(nocolor);
+      border-right: none;
+    }
+
+    ::placeholder {
+      color: color(nocolor);
+      opacity: 1;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    :-ms-input-placeholder {
+      color: color(nocolor);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    ::-ms-input-placeholder {
+      color: color(nocolor);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .fa-search {
+      position: absolute;
+      right: 0;
+      padding: 20px;
+      color: color(nocolor);
+    }
+  }
+
+  .container {
+    ul.quicklinks {
+      margin-bottom: 0px;
+      margin-left: -39px;
+      color: color(text);
+
+      .btn {
+        padding: 6px 10px;
+
+        a {
+          color: color(primary);
+          text-decoration: none;
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        a:hover {
+          color: color(primarydark);
+          text-decoration: none;
+        }
+      }
+
+      .disabled {
+        font-size: 12px;
+        font-weight: 500;
+        color: color(footer);
+      }
+    }
+  }
+}
+
+#surahs {
+  .container {
+    .nav {
+      color: color(text);
+
+      .nav-item {
+        .nav-link {
+          color: color(text);
+          font-weight: 500;
+          font-size: 14px;
+          padding: 10px 25px;
+
+          .badge {
+            color: color(nocolor);
+            background-color: color(text);
+            border-radius: 50%;
+            height: 22px;
+            padding: 5px;
+            line-height: 13px;
+          }
+        }
+
+        .nav-link.active {
+          color: color(primary);
+
+          .badge {
+            color: color(nocolor);
+            background-color: color(primary);
+          }
+        }
+      }
+    }
+
+    hr {
+      margin-left: 15px;
+      margin-right: 15px;
+    }
+
+    .tab-content {
+      .tab-pane {
+        p.manzil-text-first {
+          color: color(text);
+          margin-top: 65px;
+          margin-bottom: 30px;
+          font-size: 14px;
+        }
+
+        p.manzil-text {
+          color: color(text);
+          margin-top: 35px;
+          margin-bottom: 30px;
+          font-size: 14px;
+        }
+
+        .row {
+          a {
+            text-decoration: none;
+            cursor: pointer;
+            margin: 0px;
+            padding: 0px;
+
+            .surahbox {
+              border: 1px solid color(dullcolor);
+              border-radius: 3px;
+              padding: 6px;
+              margin-bottom: 30px;
+
+              .surah-content-left {
+                b {
+                  color: color(text);
+                  font-size: 14px;
+                }
+
+                p {
+                  color: color(primary);
+                  margin-top: 10px;
+                  margin-bottom: 0px;
+                  font-size: 12px;
+
+                  .lead {
+                    font-weight: bold;
+                    font-size: 16px;
+                  }
+                }
+              }
+
+              .surah-content-right {
+                width: 100px;
+
+                p {
+                  margin-bottom: 0px;
+                }
+
+                .verse-count {
+                  color: color(dullcolor);
+                  float: right;
+                  font-size: 14px;
+                  margin-bottom: 0px;
+                }
+              }
+            }
+          }
+        }
+
+        .row:nth-last-of-type(1) {
+          margin-bottom: 40px;
+        }
+      }
+    }
+  }
+}
+
+/***********************
+        Details Css
+***********************/
+
+main.detailmain {
+  .ayatboxouter {
+    .ayatrefbox {
+      max-height: 265px;
+      min-width: 90px;
+      background-color: color(ayatrefbg);
+      margin: 40px 0px;
+
+      .ref {
+        padding: 17px 17px;
+
+        .ref-group {
+          background-color: color(primary);
+          height: 40px;
+          color: color(nocolor);
+
+          a {
+            color: inherit;
+          }
+        }
+      }
+
+      .plycpy {
+        padding: 17px 0px;
+        line-height: 36px;
+
+        .plycpy-group {
+          font-size: 14px;
+
+          a {
+            color: color(text);
+            text-decoration: none;
+          }
+
+          a:hover {
+            color: color(primary);
+          }
+        }
+      }
+
+      .social {
+        padding: 14px 0px;
+
+        .social-group {
+          margin: 14px;
+
+          a {
+            background-color: color(dullcolor);
+            border-radius: 50%;
+            padding: 14px;
+            position: relative;
+
+            i {
+              position: absolute;
+              transform: translate(-50%, -50%);
+              color: color(nocolor);
+              font-size: 0.9em;
+            }
+          }
+
+          a.facustomfacebook:hover {
+            background-color: color(facebook);
+          }
+
+          a.facustomtwitter:hover {
+            background-color: color(twitter);
+          }
+        }
+      }
+    }
+
+    .ayatbox {
+      min-height: 265px;
+      margin: 40px 0px;
+      padding: 45px;
+      position: relative;
+
+      b:hover {
+        color: color(primary);
+      }
+
+      .translation-box {
+        line-height: 30px;
+
+        a {
+          text-transform: uppercase;
+          font-size: 12px;
+          color: color(primary);
+          font-weight: bold;
+          text-decoration: none;
+        }
+
+        p {
+          color: color(text);
+          font-size: 16px;
+        }
+      }
+
+      .bayyinah {
+        text-decoration: none;
+        color: color(primary);
+        font-weight: 500;
+        font-size: 12px;
+        position: absolute;
+        left: 45px;
+        bottom: 20px;
+      }
+
+      .bayyinah:hover {
+        color: color(primarydark);
+      }
+    }
+  }
+
+  hr:nth-last-of-type(1) {
+    display: none;
+  }
+}
