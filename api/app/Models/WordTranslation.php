@@ -30,6 +30,9 @@ class WordTranslation extends Model
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
+    public function translation(){
+        return $this->hasOne('App\Models\Translations','id','translation_id');
+    }
     public function language()
     {
         return $this->belongsTo('App\Language', 'language_code', 'language_code');

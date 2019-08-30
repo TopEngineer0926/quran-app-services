@@ -156,7 +156,8 @@ class APIController extends Controller
             'sajdah_number',
             'page_number'
         )->with('words')
-            ->with('words.translation:translation_id,language_name,text,resource_name,resource_id')
+            //->with('words.translation:translation_id,language_name,text,resource_name,resource_id')
+            ->with('words.translation')
             ->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
             ->with('words.chartype:id,name')
             ->where('chapter_id', $id)->where('verse_number', '>=', $offset)->paginate($limit);
