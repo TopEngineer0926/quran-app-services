@@ -446,7 +446,7 @@ class ImportController extends Controller
             }
         }
         foreach($paths as $path){
-        $xml = new XMLWriter(FILE_APPEND);
+        $xml = new XMLWriter();
         $xml->openMemory();
         $xml->openUri($path);
         array_push($xmls,$xml);
