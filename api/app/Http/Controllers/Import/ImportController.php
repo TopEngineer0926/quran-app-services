@@ -439,11 +439,11 @@ class ImportController extends Controller
         $recitations = Recitations::get();
         foreach ($recitations as $recitation) {
             $paths[$recitation->id] = $recitation->file_name;
-            if (isset($request->truncate)&&$request->truncate == 1) {
-                foreach ($paths as $path) {
-                    Storage::disk('public')->put($path, '');
-                }
-            }
+            // if (isset($request->truncate)&&$request->truncate == 1) {
+            //     foreach ($paths as $path) {
+            //         Storage::disk('public')->put($path, '');
+            //     }
+            // }
         }
         foreach($paths as $path){
         $xml = new XMLWriter();
