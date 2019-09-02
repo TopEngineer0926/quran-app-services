@@ -25,4 +25,7 @@ class WordTransliteration extends Model
      */
     protected $fillable = ['word_id', 'language_code', 'value'];
 
+    public function transliteration(){
+        return $this->hasOne('App\Models\Transliterations','id','transliteration_id');
+    }
 }

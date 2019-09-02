@@ -158,7 +158,8 @@ class APIController extends Controller
         )->with('words')
             //->with('words.translation:translation_id,language_name,text,resource_name,resource_id')
             ->with('words.translation')
-            ->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
+            //->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
+            ->with('words.transliteration')
             ->with('words.chartype:id,name')
             ->where('chapter_id', $id)->where('verse_number', '>=', $offset)->paginate($limit);
         foreach($verses as $verse){
@@ -166,6 +167,7 @@ class APIController extends Controller
                 $word->code_hex = html_entity_decode($word->code_hex, ENT_NOQUOTES);
                 $word->code_hex_v3 = html_entity_decode($word->code_hex_v3, ENT_NOQUOTES);
             }
+            unset($verse->translation);
         }
         return ['verses' => $verses];
     }

@@ -32,7 +32,9 @@ class WordTranslation extends Model
      */
     public function translation(){
         return $this->hasOne('App\Models\Translations','id','translation_id');
+    //->select('id','text','language_name')
     }
+
     public function language()
     {
         return $this->belongsTo('App\Language', 'language_code', 'language_code');

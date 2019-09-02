@@ -22,6 +22,7 @@ use DOMDocument;
 use Illuminate\Support\Facades\DB;
 use Storage;
 use XMLWriter;
+use Log;
 
 class ImportController extends Controller
 {
@@ -434,50 +435,81 @@ class ImportController extends Controller
         $results = array();
         $count = 0;
         $paths = array();
+        $xmls = array();
         $recitations = Recitations::get();
         foreach ($recitations as $recitation) {
             $paths[$recitation->id] = $recitation->file_name;
-            if (isset($request->truncate)) {
-                foreach($paths as $path){
-                    Storage::disk('public')->put($path,'');
+            if (isset($request->truncate)&&$request->truncate == 1) {
+                foreach ($paths as $path) {
+                    Storage::disk('public')->put($path, '');
                 }
             }
-
         }
-        $loop_url = \str_replace("{id}", 1, $url);
-        $loop_url = \str_replace("{verse_id}", 1, $loop_url);
-        $results = $curl->curl($loop_url, $name);
-        $loop =1 ;
-        $contents = array();
-        foreach($results as $result)
-        {
-            $xml = new XMLWriter();
-            $xml->openMemory();
-            $xml->openUri($paths[$loop]);
-            $xml->startDocument('1.0', 'utf-8'); //start document [1]
-            $xml->startElement('xml'); //start xml tag [2]
-            $xml->startElement('information'); //start information tag [3]
-            $xml->writeElement('reciter_id', $loop); //write element reciter id
-            $xml->writeElement('reciter_name', $recitations->where('id',$loop)->first()->reciter_name); //write element reciter_name
-            $xml->writeElement('reciter_style_id', 1); //write element
-            $xml->writeElement('reciter_style_name', 'style'); //write element
-            $xml->writeElement('format', $result->format); //write element
-            $xml->writeElement('base_url', 'base'); //write element
-            $xml->endElement(); // end information tag [3]
-            $xml->endElement(); // end xml tag [2]
-            $xml->endDocument(); //end document [1]
-
-            $content = $xml->outputMemory();
-            array_push($contents,$content);
-            $xml = null;
-            $loop++;
+        foreach($paths as $path){
+        $xml = new XMLWriter(FILE_APPEND);
+        $xml->openMemory();
+        $xml->openUri($path);
+        array_push($xmls,$xml);
         }
-        return response($contents)->header('Content-Type', 'text/xml');
+        if(isset($request->truncate) && $request->truncate==1){
+        foreach($xmls as $xml){
+        $xml->startDocument('1.0', 'utf-8'); //start document [1]
+        $xml->startElement('xml'); //start xml tag [2]
+        $xml->startElement('information'); //start information tag [3]
+        $xml->writeElement('reciter_id', 1); //write element reciter id
+        $xml->writeElement('reciter_name', 'name'); //write element reciter_name | $recitations->where('id',$loop)->first()->reciter_name
+        $xml->writeElement('reciter_style_id', 1); //write element
+        $xml->writeElement('reciter_style_name', 'style'); //write element
+        $xml->writeElement('format', 'mp3'); //write element format => mp3
+        $xml->writeElement('base_url', 'base'); //write element
+        $xml->endElement(); // end information tag [3]
+        $xml->startElement('verses'); // start verses [4]
+        }
+    }
+        //for loop here
+        if(isset($request->verse_id)){
+            $verses = Verses::where('id','>=',$request->verse_id)->get();
+        }
+        else{
+        $verses = Verses::get();
+        }
+        foreach($verses as $verse){
+            $loop_url = \str_replace("{id}", $verse->chapter_id, $url);
+            $loop_url = \str_replace("{verse_id}", $verse->id, $loop_url);
+            Log::info('Loop URL = '.$loop_url);
+            $results = $curl->curl($loop_url, $name);
+            $result_loop = 0 ;
+            foreach($results as $result){
+            $xmls[$result_loop]->startElement('verse'); //start verse [5]
+            //data here
+            $xmls[$result_loop]->writeElement('verse_id', $verse->id); // //write element verse_id
+            $xmls[$result_loop]->writeElement('chapter_id', $verse->chapter_id); // //write element chapter_id
+            $xmls[$result_loop]->writeElement('verse_number', $verse->verse_number); // //write element verse_id
+            $audio_url = explode('/',$result->url);
+            $audio_url = end($audio_url);
+            $xmls[$result_loop]->writeElement('url', $audio_url); // //write element url (audio name)
+            $xmls[$result_loop]->writeElement('duration', $result->duration); // //write element duration
+            $xmls[$result_loop]->writeElement('segments', json_encode($result->segments)); // //write element segments
+            //data end here
+            $xmls[$result_loop]->endElement(); // end verse [5]
+            //end for loop here
+            $result_loop++;
+            $count++;
+            }
+        }
+        foreach($xmls as $xml){
+        $xml->endElement(); // end verses [4]
+        $xml->endElement(); // end xml tag [2]
+        $xml->endDocument(); //end document [1]
+        }
+
+        return ['status' =>'success',
+                'data' => $count. 'data values successfully added in '.count($paths).' files'];
     }
 
     protected function chapter_info_description() //not needed any more
     {
-        $chapter_infos = ChapterInfo::select('id','text')->get();
+        $chapter_infos = ChapterInfo::select('id', 'text')->get();
         $result = array();
         $dom = new DOMDocument();
         $loop = 0;
@@ -506,5 +538,4 @@ class ImportController extends Controller
             //'result' => $result
         ];
     }
-
 }

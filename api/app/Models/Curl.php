@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Log;
 
 class Curl extends Model
 {
@@ -45,6 +46,8 @@ class Curl extends Model
         curl_setopt_array($curl, $curl_options);
 
         $result = curl_exec($curl);
+
+        Log::info('Curl Results: '.$result);
 
         $result = (array) json_decode($result);
 
