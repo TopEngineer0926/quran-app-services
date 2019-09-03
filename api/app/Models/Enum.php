@@ -11,4 +11,13 @@ class Enum extends Model
         'languages' => 'languages',
         'chapters' => 'chapters',
     ];
+    const resource_table_type = [ // resource type for resource table
+        'options' => 'options',
+    ];
+    const resource_table_subtype = [ // resource subtype for resource table
+        'translations' => 'translations',
+    ];
+    const cardinality_type = [ // list of cardinality types
+        'unique' => 'unique',
+    ];
 }

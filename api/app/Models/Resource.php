@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
@@ -32,7 +32,7 @@ class Resource extends Model
 {
     /**
      * The table associated with the model.
-     * 
+     *
      * @var string
      */
     protected $table = 'resource';
@@ -47,7 +47,7 @@ class Resource extends Model
      */
     public function author()
     {
-        return $this->belongsTo('App\Author', null, 'author_id');
+        return $this->belongsTo('App\Models\Author', null, 'author_id');
     }
 
     /**
@@ -63,7 +63,7 @@ class Resource extends Model
      */
     public function source()
     {
-        return $this->belongsTo('App\Source', null, 'source_id');
+        return $this->belongsTo('App\Models\Source', null, 'source_id');
     }
 
     /**

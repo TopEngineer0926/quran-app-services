@@ -18,6 +18,10 @@ use App\Models\WordTranslation;
 use App\Models\WordTransliteration;
 use App\Models\Recitations;
 use App\Models\QuranChapter;
+use App\Models\Resource;
+use App\Models\Source;
+use App\Models\Author;
+use App\Models\Enum;
 use DOMDocument;
 use Illuminate\Support\Facades\DB;
 use Storage;
@@ -445,66 +449,70 @@ class ImportController extends Controller
             //     }
             // }
         }
-        foreach($paths as $path){
-        $xml = new XMLWriter();
-        $xml->openMemory();
-        $xml->openUri($path);
-        array_push($xmls,$xml);
+        foreach ($paths as $path) {
+            $xml = new XMLWriter();
+            $xml->openMemory();
+            $xml->openUri($path);
+            array_push($xmls, $xml);
         }
-        if(isset($request->truncate) && $request->truncate==1){
-        foreach($xmls as $xml){
-        $xml->startDocument('1.0', 'utf-8'); //start document [1]
-        $xml->startElement('xml'); //start xml tag [2]
-        $xml->startElement('information'); //start information tag [3]
-        $xml->writeElement('reciter_id', 1); //write element reciter id
-        $xml->writeElement('reciter_name', 'name'); //write element reciter_name | $recitations->where('id',$loop)->first()->reciter_name
-        $xml->writeElement('reciter_style_id', 1); //write element
-        $xml->writeElement('reciter_style_name', 'style'); //write element
-        $xml->writeElement('format', 'mp3'); //write element format => mp3
-        $xml->writeElement('base_url', 'base'); //write element
-        $xml->endElement(); // end information tag [3]
-        $xml->startElement('verses'); // start verses [4]
-        }
-    }
-        //for loop here
-        if(isset($request->verse_id)){
-            $verses = Verses::where('id','>=',$request->verse_id)->get();
-        }
-        else{
-        $verses = Verses::get();
-        }
-        foreach($verses as $verse){
-            $loop_url = \str_replace("{id}", $verse->chapter_id, $url);
-            $loop_url = \str_replace("{verse_id}", $verse->id, $loop_url);
-            Log::info('Loop URL = '.$loop_url);
-            $results = $curl->curl($loop_url, $name);
-            $result_loop = 0 ;
-            foreach($results as $result){
-            $xmls[$result_loop]->startElement('verse'); //start verse [5]
-            //data here
-            $xmls[$result_loop]->writeElement('verse_id', $verse->id); // //write element verse_id
-            $xmls[$result_loop]->writeElement('chapter_id', $verse->chapter_id); // //write element chapter_id
-            $xmls[$result_loop]->writeElement('verse_number', $verse->verse_number); // //write element verse_id
-            $audio_url = explode('/',$result->url);
-            $audio_url = end($audio_url);
-            $xmls[$result_loop]->writeElement('url', $audio_url); // //write element url (audio name)
-            $xmls[$result_loop]->writeElement('duration', $result->duration); // //write element duration
-            $xmls[$result_loop]->writeElement('segments', json_encode($result->segments)); // //write element segments
-            //data end here
-            $xmls[$result_loop]->endElement(); // end verse [5]
-            //end for loop here
-            $result_loop++;
-            $count++;
+        if (isset($request->truncate) && $request->truncate == 1) {
+            foreach ($xmls as $xml) {
+                $xml->startDocument('1.0', 'utf-8'); //start document [1]
+                $xml->startElement('xml'); //start xml tag [2]
+                $xml->startElement('information'); //start information tag [3]
+                $xml->writeElement('reciter_id', 1); //write element reciter id
+                $xml->writeElement('reciter_name', 'name'); //write element reciter_name | $recitations->where('id',$loop)->first()->reciter_name
+                $xml->writeElement('reciter_style_id', 1); //write element
+                $xml->writeElement('reciter_style_name', 'style'); //write element
+                $xml->writeElement('format', 'mp3'); //write element format => mp3
+                $xml->writeElement('base_url', 'base'); //write element
+                $xml->endElement(); // end information tag [3]
+                $xml->startElement('verses'); // start verses [4]
             }
         }
-        foreach($xmls as $xml){
-        $xml->endElement(); // end verses [4]
-        $xml->endElement(); // end xml tag [2]
-        $xml->endDocument(); //end document [1]
+        if (isset($request->verse_id) && isset($request->mode) && $request->mode == 'single') {
+            $verses = Verses::where('id', $request->verse_id)->get();
+        }
+        //for loop here
+        else if (isset($request->verse_id)) {
+            $verses = Verses::where('id', '>=', $request->verse_id)->get();
+        } else {
+            $verses = Verses::get();
+        }
+        foreach ($verses as $verse) {
+            $loop_url = \str_replace("{id}", $verse->chapter_id, $url);
+            $loop_url = \str_replace("{verse_id}", $verse->id, $loop_url);
+            Log::info('Loop URL = ' . $loop_url);
+            $results = $curl->curl($loop_url, $name);
+            $result_loop = 0;
+            foreach ($results as $result) {
+                $xmls[$result_loop]->startElement('verse'); //start verse [5]
+                //data here
+                $xmls[$result_loop]->writeElement('verse_id', $verse->id); // //write element verse_id
+                $xmls[$result_loop]->writeElement('chapter_id', $verse->chapter_id); // //write element chapter_id
+                $xmls[$result_loop]->writeElement('verse_number', $verse->verse_number); // //write element verse_id
+                $audio_url = explode('/', $result->url);
+                $audio_url = end($audio_url);
+                $xmls[$result_loop]->writeElement('url', $audio_url); // //write element url (audio name)
+                $xmls[$result_loop]->writeElement('duration', $result->duration); // //write element duration
+                $xmls[$result_loop]->writeElement('segments', json_encode($result->segments)); // //write element segments
+                //data end here
+                $xmls[$result_loop]->endElement(); // end verse [5]
+                //end for loop here
+                $result_loop++;
+                $count++;
+            }
+        }
+        foreach ($xmls as $xml) {
+            $xml->endElement(); // end verses [4]
+            $xml->endElement(); // end xml tag [2]
+            $xml->endDocument(); //end document [1]
         }
 
-        return ['status' =>'success',
-                'data' => $count. 'data values successfully added in '.count($paths).' files'];
+        return [
+            'status' => 'success',
+            'data' => $count . 'data values successfully added in ' . count($paths) . ' files'
+        ];
     }
 
     protected function chapter_info_description() //not needed any more
@@ -537,5 +545,88 @@ class ImportController extends Controller
             'data' => $loop . ' data changed',
             //'result' => $result
         ];
+    }
+    protected function options_translations(Request $request)
+    {
+        $url = Curl::url_options_translations;
+        $name = Curl::name_options_translations;
+        $curl = new Curl;
+        $results = $curl->curl($url, $name);
+        if (isset($request->truncate) && $request->truncate == 1) {
+            Resource::truncate();
+            Author::truncate();
+            Source::truncate();
+        }
+        foreach ($results as $result) {
+            $resource = new Resource;
+            $resource->id = $result->id;
+            $resource->slug = $result->slug;
+            $resource->name = $result->name;
+            $resource->type = Enum::resource_table_type['options'];
+            $resource->sub_type = Enum::resource_table_subtype['translations'];
+            $author = Author::where('name', $resource->author_name)->first();
+            if (!$author) {
+                $author = new Author;
+                $author->name = $result->author_name;
+                $author->save();
+            }
+            $resource->author_id = $author->id;
+            $language = Language::where('name', $result->language_name)->first();
+            $resource->language_code = $language->iso_code;
+            $resource->is_available = 1;
+            $source = Source::where('name', $resource->name)->first();
+            if (!$source) {
+                $source = new Source;
+                $source->name = $resource->name;
+                $url = $resource->slug . '.xml';
+                $source->url = $url;
+                $source->save();
+            }
+            $resource->source_id = $source->id;
+            $resource->description = 'List of verse translations and authors';
+            $resource->save();
+        }
+
+        return [
+            'status' => 'success',
+            'data' => count($results) . ' data inserted successfully',
+            'results' => $results
+        ];
+    }
+
+    protected function translations()
+    { // to import translations of verse in different languages
+        $verses = Verses::where('page_number', '<=', 5)->get();
+        $verses = collect($verses);
+        $verses = $verses->groupBy('page_number');
+        foreach ($verses as $key => $verse) {
+            echo $key;
+        }
+        return 'done';
+        $url = Curl::url_translations;
+        $translations = Resource::get();
+        foreach ($translations as $translation) {
+            $url = $url . '&translations[]=' . $translation->id;
+        }
+        $name = Curl::name_verses;
+        $curl = new Curl;
+        $page = 1;
+        for ($chapter = 1; $chapter <= 2; $chapter++) {
+            $loop_url = \str_replace("{id}", $chapter, $url);
+            $loop_url = \str_replace("{page}", $page, $loop_url);
+            $results = $curl->curl($loop_url);
+            foreach ($results[$name] as $result) {
+                foreach ($result->translations as $translation) {
+                    echo 'chapter = ' . $chapter . 'verse =' . $result->verse_number . 'page = ' . $page . '\n';
+                    //store here
+                }
+            }
+            if (!$results['meta']->next_page) {
+                $page = 1;
+            } else {
+                $page = $results['meta']->next_page;
+            }
+        }
+        return 'done';
     }
 }
