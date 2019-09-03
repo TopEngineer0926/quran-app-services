@@ -21,4 +21,8 @@ class Recitations extends Model
      */
     protected $fillable = ['reciter_id', 'resource_content_id', 'recitation_style_id', 'reciter_name', 'style', 'created_at', 'updated_at'];
 
+    public function reciter()
+    {
+        return $this->hasOne('App\Models\Reciters','reciter_id','id');
+    }
 }

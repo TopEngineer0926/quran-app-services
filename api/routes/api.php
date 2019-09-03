@@ -22,3 +22,4 @@ Route::get('/chapter/{id}', 'APIController@chapter')->name('api.chapter');
 Route::get('/chapters/{id}/verses', 'APIController@verses')->name('api.verses');
 Route::get('/options/languages', 'APIController@languages')->name('api.languages');
 Route::get('/chapters/{id}/verses/{verse_id}/audio_files', 'APIController@audio_files')->name('api.audio_files');
+Route::get('/options/recitations', 'APIController@recitations')->name('api.recitations');
