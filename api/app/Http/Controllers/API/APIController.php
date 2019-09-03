@@ -215,7 +215,12 @@ class APIController extends Controller
         }
         return ['languages' => $languages];
     }
-
+    /**
+     *Function gets recitations list
+     *
+     * @author Muhammad Omer Saleh
+     * @return array recitations list
+     */
     protected function recitations(Request $request)
     {
         $recitations = Recitations::select('id','style','reciter_name as reciter_name_eng')->orderBy('reciter_name','ASC')->get();
