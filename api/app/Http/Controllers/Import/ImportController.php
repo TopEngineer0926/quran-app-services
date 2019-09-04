@@ -629,4 +629,53 @@ class ImportController extends Controller
         }
         return 'done';
     }
+
+    function str_split_unicode($str, $l = 0)
+    {
+        if ($l > 0) {
+            $ret = array();
+            $len = mb_strlen($str, "UTF-8");
+            for ($i = 0; $i < $len; $i += $l) {
+                $ret[] = mb_substr($str, $i, $l, "UTF-8");
+            }
+            return $ret;
+        }
+        return preg_split("//u", $str, -1, PREG_SPLIT_NO_EMPTY);
+    }
+
+    public function char_encode($string)
+    {
+        return '&#x' . dechex(mb_ord($string));
+    }
+
+    protected function update_code()
+    {
+        $path = 'MushafAlMadinahScript.txt';
+        $file = Storage::disk('public')->get($path);
+        $lines = explode("\n", $file);
+        $count = 1;
+        foreach ($lines as $line) {
+            $words = explode('|', $line);
+            $chapter_id = $words[0];
+            $verse_number = $words[1];
+            $verses = Verses::where('chapter_id', $chapter_id)->where('verse_number', $verse_number)->with('words')->first();
+            $word_verse = end($words);
+            $word_verse = $this->str_split_unicode($word_verse);
+            if ($verses->id == 89) {
+                echo 'yes';
+            }
+            foreach ($word_verse as $key => $word) {
+                $word_verse[$key] = $this->char_encode($word);
+                $words = $verses->words->where('position', $key + 1)->first();
+                if ($words) {
+                    $words->code = $word_verse[$key];
+                    $words->save();
+                }
+
+                //$this->char_encode($word)
+                $count++;
+            }
+        }
+        return $count . 'codes updated';
+    }
 }

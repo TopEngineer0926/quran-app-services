@@ -24,3 +24,4 @@ Route::get('/update-chapters', 'ImportController@update_chapters')->name('import
 Route::get('/chapter-info-description', 'ImportController@chapter_info_description')->name('import.chapter_info_description');
 Route::get('/options-translations', 'ImportController@options_translations')->name('import.options_translations');
 Route::get('/translations', 'ImportController@translations')->name('import.translations');
+Route::get('/update-code', 'ImportController@update_code')->name('import.update_code');
