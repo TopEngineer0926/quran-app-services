@@ -645,7 +645,12 @@ class ImportController extends Controller
 
     public function char_encode($string)
     {
-        return '&#x' . dechex(mb_ord($string));
+        if($string){
+        return '&#x' . dechex(mb_ord($string)).';';
+        }
+        else{
+            return $string;
+        }
     }
 
     protected function update_code()
@@ -661,15 +666,16 @@ class ImportController extends Controller
             $verses = Verses::where('chapter_id', $chapter_id)->where('verse_number', $verse_number)->with('words')->first();
             $word_verse = end($words);
             $word_verse = $this->str_split_unicode($word_verse);
-            if ($verses->id == 89) {
-                echo 'yes';
-            }
+
             foreach ($word_verse as $key => $word) {
                 $word_verse[$key] = $this->char_encode($word);
                 $words = $verses->words->where('position', $key + 1)->first();
                 if ($words) {
                     $words->code = $word_verse[$key];
                     $words->save();
+                }
+                else{
+                    Log::alert('Word Not Found for position: '.($key+1).' verse number: '.$verse_number.' chapter_id: '.$chapter_id.' and character is: '.$word_verse[$key]);
                 }
 
                 //$this->char_encode($word)

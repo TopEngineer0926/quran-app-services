@@ -188,7 +188,7 @@ class APIController extends Controller
             }
             foreach ($verse->words as $word) {
                 $word->code_hex = html_entity_decode($word->code_hex, ENT_NOQUOTES);
-                $word->code_hex_v3 = html_entity_decode($word->code_hex_v3.';', ENT_NOQUOTES);
+                $word->code_hex_v3 = html_entity_decode($word->code_hex_v3, ENT_NOQUOTES);
             }
             unset($verse->translation);
         }
