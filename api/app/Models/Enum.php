@@ -20,4 +20,7 @@ class Enum extends Model
     const cardinality_type = [ // list of cardinality types
         'unique' => 'unique',
     ];
+    const resource_type_media_contents = [ // rource types for media_contents table
+        'verse' => 'verse',
+    ];
 }

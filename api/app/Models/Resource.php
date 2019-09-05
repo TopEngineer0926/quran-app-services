@@ -63,7 +63,7 @@ class Resource extends Model
      */
     public function source()
     {
-        return $this->belongsTo('App\Models\Source', null, 'source_id');
+        return $this->hasOne('App\Models\Source','id', 'source_id');
     }
 
     /**

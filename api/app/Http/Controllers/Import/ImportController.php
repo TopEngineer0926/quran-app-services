@@ -21,7 +21,9 @@ use App\Models\QuranChapter;
 use App\Models\Resource;
 use App\Models\Source;
 use App\Models\Author;
+use App\Models\MediaContents;
 use App\Models\Enum;
+use App\Models\CharTypes;
 use DOMDocument;
 use Illuminate\Support\Facades\DB;
 use Storage;
@@ -228,22 +230,52 @@ class ImportController extends Controller
         return $status;
     }
 
-    protected function verses($truncate = 0)
+    protected function verses(Request $request)
     {
         $curl = new Curl;
-        $url = Curl::url_verses;
+        //$url = Curl::url_verses;
+        $url = Curl::url_verses_live;
         $name = Curl::name_verses;
         $results = array();
         $count = 0; // language = 38
-        if ($truncate == 1) {
+        $paths = array();
+        $xmls = array();
+        $resources = Resource::with('source')->get();
+        foreach ($resources as $resource) {
+            $paths[$resource->id] = $resource->source->url;
+            $url = $url . '&translations[]=' . $resource->id;
+        }
+        if (isset($request->truncate) && $request->truncate == 1) {
             Verses::truncate();
             Words::truncate();
             Translations::truncate();
             WordTranslation::truncate();
             Transliterations::truncate();
             WordTransliteration::truncate();
+            CharTypes::truncate();
+            MediaContents::truncate();
         }
-        for ($surah = 1; $surah <= 114; $surah++) {
+        foreach ($paths as $key => $path) {
+            $xml = new XMLWriter();
+            $xml->openMemory();
+            $xml->openUri($path);
+            $xmls[$key] = $xml;
+        }
+        foreach ($xmls as $key => $xml) {
+            $resource = Resource::where('id', $key)->with('source')->first();
+            $language = Language::where('iso_code', $resource->language_code)->first();
+            $xml->startDocument('1.0', 'utf-8'); //start document [1]
+            $xml->startElement('xml'); //start xml tag [2]
+            $xml->startElement('information'); //start information tag [3]
+            $xml->writeElement('language_id', $language->id); //write element language_id
+            $xml->writeElement('language_name', $language->name); //write element language_name | $recitations->where('id',$loop)->first()->reciter_name
+            $xml->writeElement('resource_id', $key); //write element resource_id
+            $xml->writeElement('resource_name', $resource->name); //write element resource_name
+            $xml->endElement(); // end information tag [3]
+            $xml->startElement('verses'); // start verses [4]
+        }
+
+        for ($surah = 1; $surah <= 10; $surah++) {
             $loop_url_id = \str_replace("{id}", $surah, $url);
             $page = 1;
             $loop_url = \str_replace("{page}", $page, $loop_url_id);
@@ -265,6 +297,30 @@ class ImportController extends Controller
                         $verse->sajdah_number = $result->sajdah_number;
                         $verse->page_number = $result->page_number;
                         $verse->save();
+
+                        foreach ($result->media_contents as $media_content) {
+                            $media = new  MediaContents;
+                            $media->resource_type = Enum::resource_type_media_contents['verse'];
+                            $media->resource_id = $verse->id;
+                            $media->url  = $media_content->url;
+                            $media->embed_text = $media_content->embed_text;
+                            $media->provider = $media_content->provider;
+                            $media->author_name = $media_content->author_name;
+                            $media->save();
+                        }
+                        foreach ($result->translations as $translation) {
+                            $xmls[$translation->resource_id]->startElement('verse'); //start verse [5]
+                            //data here
+                            $xmls[$translation->resource_id]->writeElement('chapter_id', $verse->chapter_id); // //write element chapter_id
+                            $xmls[$translation->resource_id]->writeElement('verse_id', $verse->id); // //write element verse_id
+                            $xmls[$translation->resource_id]->writeElement('verse_number', $verse->verse_number); // //write element verse_number
+                            $xmls[$translation->resource_id]->writeElement('text', $translation->text); // //write translatin text
+                            $xmls[$translation->resource_id]->writeElement('id', $translation->id); // //write id of translation
+                            //data end here
+                            $xmls[$translation->resource_id]->endElement(); // end verse [5]
+                            //end for loop here
+                        }
+
                         foreach ($result->words as $result_word) {
                             if (!Words::find($result_word->id)) {
                                 $word = new Words;
@@ -281,13 +337,15 @@ class ImportController extends Controller
                                 $word->page_number = $result_word->page_number;
                                 $word->code_hex = $result_word->code;
                                 $word->code_hex_v3 = $result_word->code_v3;
-                                $word->char_type_id = 1;
+                                $char_type = CharTypes::where('name', $result_word->char_type)->first();
+                                if (!$char_type) {
+                                    $char_type = new CharTypes;
+                                    $char_type->name = $result_word->char_type;
+                                    $char_type->save();
+                                }
+                                $word->char_type_id = $char_type->id;
                                 $word->audio_url = $result_word->audio->url;
                                 $word->save();
-
-                                // $file = explode('/', $result_word->audio->url);
-                                // $file_name = end($file);
-                                // Storage::disk('public')->append($path, '<a href="' . $file_name . '">' . $file_name . '</a>                                         27-Jul-2015 08:47               97809');
 
                                 if ($result_word->translation != null && !Translations::find($result_word->translation->id)) {
                                     $translation = new Translations;
@@ -330,8 +388,11 @@ class ImportController extends Controller
                 $loop_url = \str_replace("{page}", $page, $loop_url_id);
             }
         }
-        // Storage::disk('public')->append($path, '</pre><hr></body>
-        // </html>');
+        foreach ($xmls as $xml) {
+            $xml->endElement(); // end verses [4]
+            $xml->endElement(); // end xml tag [2]
+            $xml->endDocument(); //end document [1]
+        }
         return [
             'status' => $count . " verses successfully inserted",
             'data' => "Not shown intentionally (Would be Too Long)",
@@ -645,10 +706,9 @@ class ImportController extends Controller
 
     public function char_encode($string)
     {
-        if($string){
-        return '&#x' . dechex(mb_ord($string)).';';
-        }
-        else{
+        if ($string) {
+            return '&#x' . dechex(mb_ord($string)) . ';';
+        } else {
             return $string;
         }
     }
@@ -673,9 +733,8 @@ class ImportController extends Controller
                 if ($words) {
                     $words->code = $word_verse[$key];
                     $words->save();
-                }
-                else{
-                    Log::alert('Word Not Found for position: '.($key+1).' verse number: '.$verse_number.' chapter_id: '.$chapter_id.' and character is: '.$word_verse[$key]);
+                } else {
+                    Log::alert('Word Not Found for position: ' . ($key + 1) . ' verse number: ' . $verse_number . ' chapter_id: ' . $chapter_id . ' and character is: ' . $word_verse[$key]);
                 }
 
                 //$this->char_encode($word)

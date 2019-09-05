@@ -19,7 +19,7 @@ class CharTypes extends Model
      *
      * @var bool
      */
-    public $incrementing = false;
+    public $incrementing = true;
 
     /**
      * @var array
