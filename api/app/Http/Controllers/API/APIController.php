@@ -190,7 +190,6 @@ class APIController extends Controller
             }
             if (isset($request->translations)) {
                 $translations = array();
-                $transliterations = array();
                 foreach ($request->translations as $request_translation) {
                     $translation = Resource::where('id', $request_translation)->with('source')->first();
                     $path = $translation->source->url;
@@ -206,7 +205,6 @@ class APIController extends Controller
                             $verse_translation->put('resource_name', $information->resource_name->__toString());
                             $verse_translation->put('resource_id', $information->resource_id->__toString());
                             array_push($translations, $verse_translation);
-                            array_push($transliterations, $verse_translation);
                             //$verse->setAttribute('translation', $verse_translation);
                             //$verse->setAttribute('transliteration', $verse_translation);
                             break;
@@ -214,7 +212,6 @@ class APIController extends Controller
                     }
                 }
                 $verse->setAttribute('translations', $translations);
-                $verse->setAttribute('transliterations', $transliterations);
             }
             foreach ($verse->words as $word) {
                 $word->code_hex = html_entity_decode($word->code_hex, ENT_NOQUOTES);
