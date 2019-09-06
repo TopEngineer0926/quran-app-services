@@ -188,11 +188,31 @@ class APIController extends Controller
                     }
                 }
             }
+            if (isset($request->translations)) {
+                $translation = Resource::where('id', $request->translations)->with('source')->first();
+                $path = $translation->source->url;
+                $xml = simplexml_load_file($path);
+                $information = $xml->information;
+                $verses_xml = $xml->verses;
+                foreach ($verses_xml->verse as $verse_xml) {
+                    if ($verse_xml->verse_id == $verse->id && $verse_xml->chapter_id == $verse->chapter_id) {
+                        $verse_translation = collect();
+                        $verse_translation->put('id',$verse_xml->id->__toString());
+                        $verse_translation->put('language_name',$information->language_name->__toString());
+                        $verse_translation->put('text',$verse_xml->text->__toString());
+                        $verse_translation->put('resource_name',$information->resource_name->__toString());
+                        $verse_translation->put('resource_id',$information->resource_id->__toString());
+                        $verse->setAttribute('translation',$verse_translation);
+                        $verse->setAttribute('transliteration',$verse_translation);
+                        break;
+                    }
+
+                }
+            }
             foreach ($verse->words as $word) {
                 $word->code_hex = html_entity_decode($word->code_hex, ENT_NOQUOTES);
                 $word->code_hex_v3 = html_entity_decode($word->code_hex_v3, ENT_NOQUOTES);
             }
-            unset($verse->translation);
         }
         return ['verses' => $verses];
     }
@@ -225,7 +245,7 @@ class APIController extends Controller
      */
     protected function recitations(Request $request)
     {
-        $recitations = Recitations::select('id','style','reciter_name as reciter_name_eng')->orderBy('reciter_name','ASC')->get();
+        $recitations = Recitations::select('id', 'style', 'reciter_name as reciter_name_eng')->orderBy('reciter_name', 'ASC')->get();
         return ['recitaitons' => $recitations];
     }
     /**
@@ -298,26 +318,24 @@ class APIController extends Controller
      */
     protected function translations()
     {
-        $translations = Resource::where('type',Enum::resource_table_type['options'])
-        ->where('sub_type',Enum::resource_table_subtype['translations'])
-        ->where('is_available',1)
-        ->with('source')
-        ->with('author')
-        ->with('language')->get();
+        $translations = Resource::where('type', Enum::resource_table_type['options'])
+            ->where('sub_type', Enum::resource_table_subtype['translations'])
+            ->where('is_available', 1)
+            ->with('source')
+            ->with('author')
+            ->with('language')->get();
 
 
         $results = array();
-        foreach($translations as $translation)
-        {
+        foreach ($translations as $translation) {
             $result = collect();
-            $result->put('id',$translation->id);
-            $result->put('author_name',$translation->author->name);
-            $result->put('slug',$translation->slug);
-            $result->put('name',$translation->name);
-            $result->put('language_name',$translation->language->name);
-            array_push($results,$result);
+            $result->put('id', $translation->id);
+            $result->put('author_name', $translation->author->name);
+            $result->put('slug', $translation->slug);
+            $result->put('name', $translation->name);
+            $result->put('language_name', $translation->language->name);
+            array_push($results, $result);
         }
         return ['translations' => $results];
-
     }
 }
