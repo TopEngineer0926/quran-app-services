@@ -11,6 +11,8 @@ use App\Models\TranslatedName;
 use App\Models\Verses;
 use App\Models\Recitations;
 use App\Models\AudioFile;
+use App\Models\Resource;
+use App\Models\Enum;
 use App\Models\Words;
 use App\Models\CharTypes;
 use App\Models\WordTranslation;
@@ -242,7 +244,6 @@ class APIController extends Controller
         $recitations = null;
         $recitation = null;
         $audio_files = array();
-        $result = collect();
         if (isset($request->language)) {
             $language = Languages::where('iso_code', $language)->first();
         }
@@ -287,5 +288,36 @@ class APIController extends Controller
             }
             return ['audio_files' => $audio_files];
         }
+    }
+
+    /**
+     *Function gets translations list
+     *
+     * @author Muhammad Omer Saleh
+     * @return array translations list
+     */
+    protected function translations()
+    {
+        $translations = Resource::where('type',Enum::resource_table_type['options'])
+        ->where('sub_type',Enum::resource_table_subtype['translations'])
+        ->where('is_available',1)
+        ->with('source')
+        ->with('author')
+        ->with('language')->get();
+
+
+        $results = array();
+        foreach($translations as $translation)
+        {
+            $result = collect();
+            $result->put('id',$translation->id);
+            $result->put('author_name',$translation->author->name);
+            $result->put('slug',$translation->slug);
+            $result->put('name',$translation->name);
+            $result->put('language_name',$translation->language->name);
+            array_push($results,$result);
+        }
+        return ['translations' => $results];
+
     }
 }

@@ -47,7 +47,7 @@ class Resource extends Model
      */
     public function author()
     {
-        return $this->belongsTo('App\Models\Author', null, 'author_id');
+        return $this->hasOne('App\Models\Author', 'id', 'author_id');
     }
 
     /**
@@ -55,7 +55,7 @@ class Resource extends Model
      */
     public function language()
     {
-        return $this->belongsTo('App\Language', 'language_code', 'language_code');
+        return $this->hasOne('App\Models\Language', 'iso_code', 'language_code');
     }
 
     /**
