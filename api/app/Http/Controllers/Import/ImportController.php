@@ -275,7 +275,7 @@ class ImportController extends Controller
             $xml->startElement('verses'); // start verses [4]
         }
 
-        for ($surah = 1; $surah <= 10; $surah++) {
+        for ($surah = 1; $surah <= 114; $surah++) {
             $loop_url_id = \str_replace("{id}", $surah, $url);
             $page = 1;
             $loop_url = \str_replace("{page}", $page, $loop_url_id);
