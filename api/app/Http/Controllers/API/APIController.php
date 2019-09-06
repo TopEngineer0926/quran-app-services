@@ -189,25 +189,32 @@ class APIController extends Controller
                 }
             }
             if (isset($request->translations)) {
-                $translation = Resource::where('id', $request->translations)->with('source')->first();
-                $path = $translation->source->url;
-                $xml = simplexml_load_file($path);
-                $information = $xml->information;
-                $verses_xml = $xml->verses;
-                foreach ($verses_xml->verse as $verse_xml) {
-                    if ($verse_xml->verse_id == $verse->id && $verse_xml->chapter_id == $verse->chapter_id) {
-                        $verse_translation = collect();
-                        $verse_translation->put('id',$verse_xml->id->__toString());
-                        $verse_translation->put('language_name',$information->language_name->__toString());
-                        $verse_translation->put('text',$verse_xml->text->__toString());
-                        $verse_translation->put('resource_name',$information->resource_name->__toString());
-                        $verse_translation->put('resource_id',$information->resource_id->__toString());
-                        $verse->setAttribute('translation',$verse_translation);
-                        $verse->setAttribute('transliteration',$verse_translation);
-                        break;
+                $translations = array();
+                $transliterations = array();
+                foreach ($request->translations as $request_translation) {
+                    $translation = Resource::where('id', $request_translation)->with('source')->first();
+                    $path = $translation->source->url;
+                    $xml = simplexml_load_file($path);
+                    $information = $xml->information;
+                    $verses_xml = $xml->verses;
+                    foreach ($verses_xml->verse as $verse_xml) {
+                        if ($verse_xml->verse_id == $verse->id && $verse_xml->chapter_id == $verse->chapter_id) {
+                            $verse_translation = collect();
+                            $verse_translation->put('id', $verse_xml->id->__toString());
+                            $verse_translation->put('language_name', $information->language_name->__toString());
+                            $verse_translation->put('text', $verse_xml->text->__toString());
+                            $verse_translation->put('resource_name', $information->resource_name->__toString());
+                            $verse_translation->put('resource_id', $information->resource_id->__toString());
+                            array_push($translations, $verse_translation);
+                            array_push($transliterations, $verse_translation);
+                            //$verse->setAttribute('translation', $verse_translation);
+                            //$verse->setAttribute('transliteration', $verse_translation);
+                            break;
+                        }
                     }
-
                 }
+                $verse->setAttribute('translations', $translations);
+                $verse->setAttribute('transliterations', $transliterations);
             }
             foreach ($verse->words as $word) {
                 $word->code_hex = html_entity_decode($word->code_hex, ENT_NOQUOTES);
