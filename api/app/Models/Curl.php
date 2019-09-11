@@ -12,7 +12,7 @@ class Curl extends Model
     const url_languages = "http://staging.quran.com:3000/api/v3/options/languages";
     const name_languages = "languages";
 
-    const url_chapters = "http://staging.quran.com:3000/api/v3/chapters";
+    const url_chapters = "http://staging.quran.com:3000/api/v3/chapters?language={language}";
     const name_chapters = "chapters";
 
     const url_chapter_info = "http://staging.quran.com:3000/api/v3/chapters/{id}/info";

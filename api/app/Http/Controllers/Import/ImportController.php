@@ -743,4 +743,40 @@ class ImportController extends Controller
         }
         return $count . 'codes updated';
     }
+
+    protected function chapter_resource()
+    {
+        $names = TranslatedName::where('resource_type','languages')->get();
+        $loop =1 ;
+        foreach($names as $name)
+        {
+            $name->resource_id = Language::where('name',$name->name)->first()->id;
+            $name->language_priority = null;
+            $name->save();
+            $loop++;
+        }
+        return $loop.' records updated successfully';
+    }
+    protected function translated_names(Request $request){
+        $language = null;
+        if(isset($request->language)){
+            $language = $request->language;
+        }
+        $url = Curl::url_chapters;
+        $name = Curl::name_chapters;
+        $url = \str_replace("{language}",$language, $url);
+        $curl = new Curl;
+        $results = $curl->curl($url,$name);
+        $language_id = Language::where('iso_code',$language)->first()->id;
+        foreach($results as $result)
+        {
+            $name = new TranslatedName;
+            $name->resource_type = 'chapters';
+            $name->resource_id = $result->id;
+            $name->language_id = $language_id;
+            $name->name = $result->translated_name->name;
+            $name->language_name = $result->translated_name->language_name;
+            $name->save();
+        }
+    }
 }

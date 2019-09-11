@@ -25,3 +25,5 @@ Route::get('/chapter-info-description', 'ImportController@chapter_info_descripti
 Route::get('/options-translations', 'ImportController@options_translations')->name('import.options_translations');
 Route::get('/translations', 'ImportController@translations')->name('import.translations');
 Route::get('/update-code', 'ImportController@update_code')->name('import.update_code');
+Route::get('/chapter-resource', 'ImportController@chapter_resource')->name('import.chapter_resource');
+Route::get('/translated-names', 'ImportController@translated_names')->name('import.translated_names');
