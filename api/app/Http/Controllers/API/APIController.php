@@ -105,7 +105,7 @@ class APIController extends Controller
         $language = Languages::where('iso_code', $language)->first();
         if ($language) {
             $language_id = $language->id;
-            $translated_names = TranslatedName::select('language_name', 'name')->where('language_id', $language_id)->where('resource_type', 'chapters')->get()->toArray();
+            $translated_names = TranslatedName::select('language_name', 'name')->where('language_id', $language_id)->where('resource_type', 'chapters')->where('resource_id',$id)->get()->toArray();
             $chapter = Chapter::where('id', $id)->first();
             $loop = 0;
             if ($chapter) {
