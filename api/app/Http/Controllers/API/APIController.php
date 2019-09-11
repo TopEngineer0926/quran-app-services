@@ -342,4 +342,37 @@ class APIController extends Controller
         }
         return ['translations' => $results];
     }
+
+    protected function search(Request $request)
+    {
+        $query = null;
+        if(isset($request->q)){
+            $query = $request->q;
+            $results = Verses::select(
+                'id',
+                'verse_number',
+                'chapter_id',
+                'verse_key',
+                'text_madani',
+                'text_indopak',
+                'text_simple',
+                'juz_number',
+                'hizb_number',
+                'rub_number',
+                'sajdah',
+                'sajdah_number',
+                'page_number')
+                ->where('text_madani','like','%'.$query.'%')
+                ->orWhere('text_indopak','like','%'.$query.'%')
+                ->orWhere('text_simple','like','%'.$query.'%')
+                ->with('words')->get();
+            return ['total_count' => count($results),
+                    'results' => $results];
+        }
+        else
+        {
+            return ['status' => 'error',
+                    'data' => 'Please provide search query'];
+        }
+    }
 }
