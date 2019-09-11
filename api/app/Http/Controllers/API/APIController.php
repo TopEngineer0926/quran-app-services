@@ -213,10 +213,6 @@ class APIController extends Controller
                 }
                 $verse->setAttribute('translations', $translations);
             }
-            foreach ($verse->words as $word) {
-                $word->code_hex = html_entity_decode($word->code_hex, ENT_NOQUOTES);
-                $word->code_hex_v3 = html_entity_decode($word->code_hex_v3, ENT_NOQUOTES);
-            }
         }
         return ['verses' => $verses];
     }
@@ -346,9 +342,31 @@ class APIController extends Controller
     protected function search(Request $request)
     {
         $query = null;
+        $results = collect([]);
+        $result = null;
         if(isset($request->q)){
             $query = $request->q;
-            $results = Verses::select(
+            if(preg_match("/:/", $query)){
+                $result = Verses::select(
+                    'id',
+                    'verse_number',
+                    'chapter_id',
+                    'verse_key',
+                    'text_madani',
+                    'text_indopak',
+                    'text_simple',
+                    'juz_number',
+                    'hizb_number',
+                    'rub_number',
+                    'sajdah',
+                    'sajdah_number',
+                    'page_number')
+                    ->where('verse_key',$query)
+                    ->with('words')->get();
+                    $results = $results->merge($result);
+            }
+            else{
+            $result = Verses::select(
                 'id',
                 'verse_number',
                 'chapter_id',
@@ -366,13 +384,19 @@ class APIController extends Controller
                 ->orWhere('text_indopak','like','%'.$query.'%')
                 ->orWhere('text_simple','like','%'.$query.'%')
                 ->with('words')->get();
-            return ['total_count' => count($results),
-                    'results' => $results];
+
+                $results = $results->merge($result);
+
+
+            }
+
         }
         else
         {
             return ['status' => 'error',
                     'data' => 'Please provide search query'];
         }
+        return ['total_count' => count($results),
+                    'results' => $results];
     }
 }
