@@ -114,7 +114,7 @@ class APIController extends Controller
                 $chapter->setAttribute('translated_name', $translated_names[$loop]);
                 $loop++;
             }
-            return ['chapters' => $chapter];
+            return ['chapter' => $chapter];
         } else {
             return [
                 'status' => 'error',
