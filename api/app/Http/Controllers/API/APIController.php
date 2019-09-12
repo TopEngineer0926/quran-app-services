@@ -179,7 +179,7 @@ class APIController extends Controller
                 foreach ($verses_xml->verse as $verse_xml) {
                     if ($verse_xml->verse_id == $verse->id && $verse_xml->chapter_id == $verse->chapter_id) {
                         $audio_file = new AudioFile;
-                        $audio_file->url = $verse_xml->url->__toString();
+                        $audio_file->url = Enum::url_audio.$information->base_url->__toString().'/'.$verse_xml->url->__toString();
                         $audio_file->duration = $verse_xml->duration->__toString();
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
@@ -297,7 +297,7 @@ class APIController extends Controller
                 foreach ($verses->verse as $verse) {
                     if ($verse->verse_id == $verse_id && $verse->chapter_id == $id) {
                         $audio_file = new AudioFile;
-                        $audio_file->url = $verse->url->__toString();
+                        $audio_file->url = Enum::url_audio.$information->base_url->__toString().'/'.$verse->url->__toString();
                         $audio_file->duration = $verse->duration->__toString();
                         $audio_file->segments = json_decode($verse->segments);
                         $audio_file->format = $information->format->__toString();
@@ -441,7 +441,7 @@ class APIController extends Controller
     {
         $path = 'al-hasan-efendi.xml';
         $xml = simplexml_load_file($path);
-        $results = $xml->xpath('//xml/verses/verse[id="421885"]');
+        $results = $xml->xpath('//xml/verses/verse/text[contains(text()," mëdhenj ")]');
         return $results;
 
     }

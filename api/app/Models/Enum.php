@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Enum extends Model
 {
     //
+    const url_audio = 'https://s3.us-east-2.amazonaws.com/quran.com/verses/';
     const resource_type = [ // resource types for translated_names
         'languages' => 'languages',
         'chapters' => 'chapters',
