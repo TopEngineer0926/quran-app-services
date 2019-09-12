@@ -381,9 +381,9 @@ class APIController extends Controller
                 'sajdah',
                 'sajdah_number',
                 'page_number')
-                ->where('text_madani','like','% '.$query.' %')
-                ->orWhere('text_indopak','like','% '.$query.' %')
-                ->orWhere('text_simple','like','%' .$query.' %')
+                ->where('text_madani','like','%'.$query.'%')
+                ->orWhere('text_indopak','like','%'.$query.'%')
+                ->orWhere('text_simple','like','%' .$query.'%')
                 ->with('words')->get();
                 $results = $results->merge($result);
 
@@ -399,7 +399,7 @@ class APIController extends Controller
                     $information = $xml->information;
                     $verses_xml = $xml->verses;
                     foreach ($verses_xml->verse as $verse_xml) {
-                        if(preg_match('/\b'.$query.'(?=$|\s)/', $verse_xml->text->__toString())){
+                        if(preg_match('/\b'.$query.'(?=$|\s)/i', $verse_xml->text->__toString())){
                             $verse_translation = collect();
                             $verse_translation->put('id', $verse_xml->id->__toString());
                             $verse_translation->put('language_name', $information->language_name->__toString());
