@@ -381,15 +381,12 @@ class APIController extends Controller
                 'sajdah',
                 'sajdah_number',
                 'page_number')
-                ->where('text_madani','like','%'.$query.'%')
-                ->orWhere('text_indopak','like','%'.$query.'%')
-                ->orWhere('text_simple','like','%'.$query.'%')
+                ->where('text_madani','like','% '.$query.' %')
+                ->orWhere('text_indopak','like','% '.$query.' %')
+                ->orWhere('text_simple','like','%' .$query.' %')
                 ->with('words')->get();
                 $results = $results->merge($result);
-                if(count($result)>0){
-                    return ['total_count' => count($results),
-                    'results' => $results];
-                }
+
             $paths = array();
                 $resources = Resource::where('type',Enum::resource_table_type['options'])
                 ->where('sub_type',Enum::resource_table_subtype['translations'])
@@ -438,5 +435,14 @@ class APIController extends Controller
                 'total_pages' => (int)($count/$limit)+1,
                 'per_page' =>(int)$limit,
                 'results' => $results[$p-1]];
+    }
+
+    protected function test()
+    {
+        $path = 'al-hasan-efendi.xml';
+        $xml = simplexml_load_file($path);
+        $results = $xml->xpath('//xml/verses/verse[id="421885"]');
+        return $results;
+
     }
 }

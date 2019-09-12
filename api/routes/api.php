@@ -25,3 +25,4 @@ Route::get('/chapters/{id}/verses/{verse_id}/audio_files', 'APIController@audio_
 Route::get('/options/recitations', 'APIController@recitations')->name('api.recitations');
 Route::get('/options/translations', 'APIController@translations')->name('api.translations');
 Route::get('search', 'APIController@search')->name('api.search');
+Route::get('test', 'APIController@test')->name('api.test');
