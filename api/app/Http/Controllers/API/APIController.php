@@ -363,6 +363,7 @@ class APIController extends Controller
                     'page_number')
                     ->where('verse_key',$query)
                     ->with('words')->get();
+                    //$results = $results->push($result);
                     $results = $results->merge($result);
             }
             else{
@@ -384,10 +385,35 @@ class APIController extends Controller
                 ->orWhere('text_indopak','like','%'.$query.'%')
                 ->orWhere('text_simple','like','%'.$query.'%')
                 ->with('words')->get();
-
                 $results = $results->merge($result);
-
-
+                if(count($result)>0){
+                    return ['total_count' => count($results),
+                    'results' => $results];
+                }
+            $paths = array();
+                $resources = Resource::where('type',Enum::resource_table_type['options'])
+                ->where('sub_type',Enum::resource_table_subtype['translations'])
+                ->with('source')->get();
+                foreach ($resources as $resource) {
+                    $paths[$resource->id] = $resource->source->url;
+                }
+                foreach($paths as $path){
+                    $xml = simplexml_load_file($path);
+                    $information = $xml->information;
+                    $verses_xml = $xml->verses;
+                    foreach ($verses_xml->verse as $verse_xml) {
+                        if(preg_match('/\b'.$query.'(?=$|\s)/', $verse_xml->text->__toString())){
+                            $verse_translation = collect();
+                            $verse_translation->put('id', $verse_xml->id->__toString());
+                            $verse_translation->put('language_name', $information->language_name->__toString());
+                            $text = str_ireplace($query,'<em class="hlt1">'.$query.'</em>',$verse_xml->text->__toString());
+                            $verse_translation->put('text', $text);
+                            $verse_translation->put('resource_name', $information->resource_name->__toString());
+                            $verse_translation->put('resource_id', $information->resource_id->__toString());
+                            $results = $results->push($verse_translation);
+                        }
+                    }
+                }
             }
 
         }
@@ -396,7 +422,21 @@ class APIController extends Controller
             return ['status' => 'error',
                     'data' => 'Please provide search query'];
         }
-        return ['total_count' => count($results),
-                    'results' => $results];
+        $p = 1;
+        $limit = 20;
+        if(isset($request->p)){
+            $p = $request->p;
+        }
+        if(isset($request->limit)){
+            $limit = $request->limit;
+        }
+        $count = count($results);
+        $results = $results->chunk($limit);
+        return ['query' => $query,
+                'total_count' => $count,
+                'current_page' => (int)$p,
+                'total_pages' => (int)($count/$limit)+1,
+                'per_page' =>(int)$limit,
+                'results' => $results[$p-1]];
     }
 }
