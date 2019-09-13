@@ -20,6 +20,8 @@ use App\Models\Translations;
 use Carbon;
 use DOMElement;
 use XMLWriter;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class APIController extends Controller
 {
@@ -367,25 +369,25 @@ class APIController extends Controller
                     $results = $results->merge($result);
             }
             else{
-            $result = Verses::select(
-                'id',
-                'verse_number',
-                'chapter_id',
-                'verse_key',
-                'text_madani',
-                'text_indopak',
-                'text_simple',
-                'juz_number',
-                'hizb_number',
-                'rub_number',
-                'sajdah',
-                'sajdah_number',
-                'page_number')
-                ->where('text_madani','like','%'.$query.'%')
-                ->orWhere('text_indopak','like','%'.$query.'%')
-                ->orWhere('text_simple','like','%' .$query.'%')
-                ->with('words')->get();
-                $results = $results->merge($result);
+            // $result = Verses::select(
+            //     'id',
+            //     'verse_number',
+            //     'chapter_id',
+            //     'verse_key',
+            //     'text_madani',
+            //     'text_indopak',
+            //     'text_simple',
+            //     'juz_number',
+            //     'hizb_number',
+            //     'rub_number',
+            //     'sajdah',
+            //     'sajdah_number',
+            //     'page_number')
+            //     ->where('text_madani','like','%'.$query.'%')
+            //     ->orWhere('text_indopak','like','%'.$query.'%')
+            //     ->orWhere('text_simple','like','%' .$query.'%')
+            //     ->with('words')->get();
+            //     $results = $results->merge($result);
 
             $paths = array();
                 $resources = Resource::where('type',Enum::resource_table_type['options'])
@@ -399,7 +401,7 @@ class APIController extends Controller
                     $information = $xml->information;
                     $verses_xml = $xml->verses;
                     foreach ($verses_xml->verse as $verse_xml) {
-                        if(preg_match('/\b'.$query.'(?=$|\s)/i', $verse_xml->text->__toString())){
+                        if(preg_match('/\b'.$query.'(?=$|\s)/', $verse_xml->text->__toString())){
                             $verse_translation = collect();
                             $verse_translation->put('id', $verse_xml->id->__toString());
                             $verse_translation->put('language_name', $information->language_name->__toString());
@@ -412,6 +414,7 @@ class APIController extends Controller
                     }
                 }
             }
+            return $results;
 
         }
         else
@@ -439,10 +442,28 @@ class APIController extends Controller
 
     protected function test()
     {
-        $path = 'al-hasan-efendi.xml';
-        $xml = simplexml_load_file($path);
-        $results = $xml->xpath('//xml/verses/verse/text[contains(text()," mëdhenj ")]');
-        return $results;
+        // $path = 'al-hasan-efendi.xml';
+        // $xml = simplexml_load_file($path);
+        // $results = $xml->xpath('//xml/verses/verse/text[contains(text()," mëdhenj ")]');
+        // return $results;
+        $page =1;
+        $perpage = 1;
+        $collection = collect([1,2,3,4,5,6,7,8,9,10]);
+        $t1 = "b";
+        $pagelinks = $this->makeLengthAware($collection , count($collection), $perpage,['t1' => $t1]);
+        return $pagelinks;
+    }
+
+    public static function makeLengthAware($collection, $total, $perPage, $appends = null)
+    {
+        $paginator = new LengthAwarePaginator(
+                $collection, $total, $perPage, Paginator::resolveCurrentPage(), ['path' => Paginator::resolveCurrentPath()]
+        );
+
+        if ($appends)
+            $paginator->appends($appends);
+
+        return str_replace('/?', '?', $paginator->render());
 
     }
 }
