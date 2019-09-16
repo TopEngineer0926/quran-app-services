@@ -55,6 +55,10 @@ class Verses extends Model
         return $this->hasMany('App\Models\Words', 'verse_id', 'id')->select(['id', 'verse_id', 'position', 'text_madani', 'text_indopak', 'text_simple', 'verse_key', 'class_name', 'line_number', 'page_number', 'code_hex', 'code as code_hex_v3', 'audio_url', 'char_type_id']);
     }
 
+    public function media_contents()
+    {
+        return $this->hasOne('App\Models\MediaContents','resource_id','id')->select(['url','embed_text','provider','author_name','resource_id'])->where('resource_type','verse');
+    }
 
     public function searchableAs()
     {

@@ -167,7 +167,9 @@ class APIController extends Controller
             'sajdah',
             'sajdah_number',
             'page_number'
-        )->with('words')
+        )
+        ->with('media_contents')
+        ->with('words')
             //->with('words.translation:translation_id,language_name,text,resource_name,resource_id')
             ->with('words.translation')
             //->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
@@ -485,6 +487,13 @@ class APIController extends Controller
         $fullTextSearchPageCount = 0;
 
         $fullTextSearchCount = Verses::search($query)->get()->count();
+
+        $result = Verses::search($query)->paginate($paginate, '', $pageNo)->load('words');
+        $result = $result->toArray();
+
+
+
+
 
         if (isset($fullTextSearchCount) && !empty($fullTextSearchCount)) {
             $fullTextSearchPageCount = ceil($fullTextSearchCount / $paginate);
