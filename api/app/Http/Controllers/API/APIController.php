@@ -20,6 +20,8 @@ use App\Models\Translations;
 use Carbon;
 use DOMElement;
 use XMLWriter;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class APIController extends Controller
 {
@@ -28,7 +30,6 @@ class APIController extends Controller
     {
         $this->middleware('cors');
     }
-
     /**
      *Function gets chapters list
      *
@@ -63,7 +64,6 @@ class APIController extends Controller
             ];
         }
     }
-
     /**
      *Function gets chapter info based on id (1 to 114)
      *
@@ -107,7 +107,7 @@ class APIController extends Controller
         $language = Languages::where('iso_code', $language)->first();
         if ($language) {
             $language_id = $language->id;
-            $translated_names = TranslatedName::select('language_name', 'name')->where('language_id', $language_id)->where('resource_type', 'chapters')->where('resource_id', $id)->get()->toArray();
+            $translated_names = TranslatedName::select('language_name', 'name')->where('language_id', $language_id)->where('resource_type', 'chapters')->where('resource_id',$id)->get()->toArray();
             $chapter = Chapter::where('id', $id)->first();
             $loop = 0;
             if ($chapter) {
@@ -124,12 +124,11 @@ class APIController extends Controller
             ];
         }
     }
-
     /**
      *Function gets verses for specfic Chapter
      *
      * @author Muhammad Omer Saleh
-     * @param int $id : Id for chapter (1 to 114)
+     * @param int $id: Id for chapter (1 to 114)
      * @param string language: To select translation language 'en' by default (can be array) (Optional)
      * @param int page: page number for current chapter max 50 (Optional)
      * @param int limit: Limit verses for current page (10 by default) (Optional)
@@ -182,7 +181,7 @@ class APIController extends Controller
                 foreach ($verses_xml->verse as $verse_xml) {
                     if ($verse_xml->verse_id == $verse->id && $verse_xml->chapter_id == $verse->chapter_id) {
                         $audio_file = new AudioFile;
-                        $audio_file->url = $verse_xml->url->__toString();
+                        $audio_file->url = Enum::url_audio.$information->base_url->__toString().'/'.$verse_xml->url->__toString();
                         $audio_file->duration = $verse_xml->duration->__toString();
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
@@ -219,7 +218,6 @@ class APIController extends Controller
         }
         return ['verses' => $verses];
     }
-
     /**
      *Function gets languages list
      *
@@ -241,7 +239,6 @@ class APIController extends Controller
         }
         return ['languages' => $languages];
     }
-
     /**
      *Function gets recitations list
      *
@@ -253,7 +250,6 @@ class APIController extends Controller
         $recitations = Recitations::select('id', 'style', 'reciter_name as reciter_name_eng')->orderBy('reciter_name', 'ASC')->get();
         return ['recitaitons' => $recitations];
     }
-
     /**
      *Function gets audio files information
      *
@@ -303,7 +299,7 @@ class APIController extends Controller
                 foreach ($verses->verse as $verse) {
                     if ($verse->verse_id == $verse_id && $verse->chapter_id == $id) {
                         $audio_file = new AudioFile;
-                        $audio_file->url = $verse->url->__toString();
+                        $audio_file->url = Enum::url_audio.$information->base_url->__toString().'/'.$verse->url->__toString();
                         $audio_file->duration = $verse->duration->__toString();
                         $audio_file->segments = json_decode($verse->segments);
                         $audio_file->format = $information->format->__toString();
@@ -350,9 +346,9 @@ class APIController extends Controller
         $query = null;
         $results = collect([]);
         $result = null;
-        if (isset($request->q)) {
+        if(isset($request->q)){
             $query = $request->q;
-            if (preg_match("/:/", $query)) {
+            if(preg_match("/:/", $query)){
                 $result = Verses::select(
                     'id',
                     'verse_number',
@@ -367,464 +363,49 @@ class APIController extends Controller
                     'sajdah',
                     'sajdah_number',
                     'page_number')
-                    ->where('verse_key', $query)
+                    ->where('verse_key',$query)
                     ->with('words')->get();
-                //$results = $results->push($result);
-                $results = $results->merge($result);
-            } else {
-                $result = Verses::select(
-                    'id',
-                    'verse_number',
-                    'chapter_id',
-                    'verse_key',
-                    'text_madani',
-                    'text_indopak',
-                    'text_simple',
-                    'juz_number',
-                    'hizb_number',
-                    'rub_number',
-                    'sajdah',
-                    'sajdah_number',
-                    'page_number')
-                    ->where('text_madani', 'like', '%' . $query . '%')
-                    ->orWhere('text_indopak', 'like', '%' . $query . '%')
-                    ->orWhere('text_simple', 'like', '%' . $query . '%')
-                    ->with('words')->get();
-                $results = $results->merge($result);
-
-                $paths = array();
-                $resources = Resource::where('type', Enum::resource_table_type['options'])
-                    ->where('sub_type', Enum::resource_table_subtype['translations'])
-                    ->with('source')->get();
-                foreach ($resources as $resource) {
-                    $paths[$resource->id] = $resource->source->url;
-                }
-                foreach ($paths as $path) {
-                    $xml = simplexml_load_file($path);
-                    $information = $xml->information;
-                    $verses_xml = $xml->verses;
-                    foreach ($verses_xml->verse as $verse_xml) {
-                        if (preg_match('/\b' . $query . '(?=$|\s)/i', $verse_xml->text->__toString())) {
-                            $verse_translation = collect();
-                            $verse_translation->put('id', $verse_xml->id->__toString());
-                            $verse_translation->put('language_name', $information->language_name->__toString());
-                            $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
-                            $verse_translation->put('text', $text);
-                            $verse_translation->put('resource_name', $information->resource_name->__toString());
-                            $verse_translation->put('resource_id', $information->resource_id->__toString());
-                            $results = $results->push($verse_translation);
-                        }
-                    }
-                }
+                    //$results = $results->push($result);
+                    $results = $results->merge($result);
             }
+            else{
+            // $result = Verses::select(
+            //     'id',
+            //     'verse_number',
+            //     'chapter_id',
+            //     'verse_key',
+            //     'text_madani',
+            //     'text_indopak',
+            //     'text_simple',
+            //     'juz_number',
+            //     'hizb_number',
+            //     'rub_number',
+            //     'sajdah',
+            //     'sajdah_number',
+            //     'page_number')
+            //     ->where('text_madani','like','%'.$query.'%')
+            //     ->orWhere('text_indopak','like','%'.$query.'%')
+            //     ->orWhere('text_simple','like','%' .$query.'%')
+            //     ->with('words')->get();
+            //     $results = $results->merge($result);
 
-        } else {
-            return ['status' => 'error',
-                'data' => 'Please provide search query'];
-        }
-        $p = 1;
-        $limit = 20;
-        if (isset($request->p)) {
-            $p = $request->p;
-        }
-        if (isset($request->limit)) {
-            $limit = $request->limit;
-        }
-        $count = count($results);
-        $results = $results->chunk($limit);
-        return ['query' => $query,
-            'total_count' => $count,
-            'current_page' => (int)$p,
-            'total_pages' => (int)($count / $limit) + 1,
-            'per_page' => (int)$limit,
-            'results' => $results[$p - 1]];
-    }
-
-
-    public function translationRecord($query)
-    {
-        $finalResult = [];
-        $iDs = [];
-        $paths = array();
-        $resources = Resource::where('type', Enum::resource_table_type['options'])
-            ->where('sub_type', Enum::resource_table_subtype['translations'])
-            ->with('source')->get();
-        foreach ($resources as $resource) {
-            $paths[$resource->id] = $resource->source->url;
-        }
-
-        foreach ($paths as $path) {
-            $xml = simplexml_load_file($path);
-            $information = $xml->information;
-            $verses_xml = $xml->verses;
-            foreach ($verses_xml->verse as $verse_xml) {
-                if (preg_match('/\b' . $query . '(?=$|\s)/i', $verse_xml->text->__toString())) {
-
-                    $iDs[$verse_xml->verse_id->__toString()] = $verse_xml->verse_id->__toString();
-
-//                    $verse_translation = collect();
-//                    $verse_translation->put('id', $verse_xml->id->__toString());
-//                    $verse_translation->put('verse_id', $verse_xml->verse_id->__toString());
-//                    $verse_translation->put('language_name', $information->language_name->__toString());
-//                    $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
-//                    $verse_translation->put('text', $text);
-//                    $verse_translation->put('resource_name', $information->resource_name->__toString());
-//                    $verse_translation->put('resource_id', $information->resource_id->__toString());
-                    //  $results = $results->push($verse_translation);
-                }
-            }
-        }
-
-        if ($iDs) {
-            $iDs = array_values($iDs);
-            $finalResult["total_rec"] = count($iDs);
-        }
-
-        return $finalResult;
-
-
-    }
-
-
-    protected function search2(Request $request)
-    {
-        $query = 'Allah';
-        // $query = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-        //$query = 'اللَّهِ';
-        // $query = 'الله‎';
-
-
-        $isArabic = $this->is_arabic($query);
-
-
-        $pageNo = 32;
-        $paginate = 50;
-        $fullTextSearchCount = 0;
-        $fullTextSearchPageCount = 0;
-
-        if ($isArabic)
-            $fullTextSearchCount = Verses::search($query)->get()->count();
-
-        if (isset($fullTextSearchCount) && !empty($fullTextSearchCount)) {
-            $fullTextSearchPageCount = ceil($fullTextSearchCount / $paginate);
-            $fullTextSearchPageCount = (int)$fullTextSearchPageCount;
-        }
-
-
-        $translationResult = [];
-        $translationResult = $this->translationRecord($query, true);
-        $translationCount = isset($translationResult['total_rec']) && !empty($translationResult['total_rec']) ? $translationResult['total_rec'] : 0;
-
-        $totalRecordCount = $totalPages = 0;
-        $totalRecordCount = $fullTextSearchPageCount + $translationCount;
-        $totalPages = ceil($totalRecordCount/$paginate);
-        $totalPages = (int)$totalPages;
-
-        echo $totalPages;
-        exit;
-
-
-
-        $result = [];
-        if ($pageNo < ($fullTextSearchPageCount - 1)) {
-            $result = Verses::search($query)->paginate($paginate, '', $pageNo)->load('words');
-            $result = $result->toArray();
-
-        } else if ($pageNo == ($fullTextSearchPageCount)) {
-
-            $fullTextSearch = Verses::search($query)->paginate($paginate, '', $pageNo)->load('words');
-            $fullTextSearch = $fullTextSearch->toArray();
-
-
-            $moreNeedToFetch = $paginate;
-            $moreNeedToFetch = $paginate - count($fullTextSearch);
-
-
-            $result = Verses::with('words')
-                ->where("id", "<", "100")
-                ->paginate($moreNeedToFetch);
-            $result = $result->items();
-            foreach ($result as $r) {
-                $fullTextSearch[] = $r->toArray();
-
-            }
-
-        } else if ($pageNo > ($fullTextSearchPageCount)) {
-
-
-            $iDs = [];
             $paths = array();
-            $resources = Resource::where('type', Enum::resource_table_type['options'])
-                ->where('sub_type', Enum::resource_table_subtype['translations'])
+                $resources = Resource::where('type',Enum::resource_table_type['options'])
+                ->where('sub_type',Enum::resource_table_subtype['translations'])
                 ->with('source')->get();
-            foreach ($resources as $resource) {
-                $paths[$resource->id] = $resource->source->url;
-            }
-
-            foreach ($paths as $path) {
-                $xml = simplexml_load_file($path);
-                $information = $xml->information;
-                $verses_xml = $xml->verses;
-                foreach ($verses_xml->verse as $verse_xml) {
-                    if (preg_match('/\b' . $query . '(?=$|\s)/i', $verse_xml->text->__toString())) {
-                        $verse_translation = collect();
-
-                        $iDs[$verse_xml->verse_id->__toString()] = $verse_xml->verse_id->__toString();
-                        $verse_translation->put('id', $verse_xml->id->__toString());
-                        $verse_translation->put('verse_id', $verse_xml->verse_id->__toString());
-                        $verse_translation->put('language_name', $information->language_name->__toString());
-                        $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
-                        $verse_translation->put('text', $text);
-                        $verse_translation->put('resource_name', $information->resource_name->__toString());
-                        $verse_translation->put('resource_id', $information->resource_id->__toString());
-
-
-                        //  $results = $results->push($verse_translation);
-                    }
-                }
-            }
-
-
-            $iDs = array_values($iDs);
-
-            $result = Verses::with('words')
-                ->whereIn("id", $iDs)
-                ->paginate($paginate, '*', '', 3);
-
-
-            $result = $result->items();
-            foreach ($result as $r) {
-                $fullTextSearch[] = $r->toArray();
-            }
-
-            $result = $fullTextSearch;
-
-
-        }
-
-
-        //$fullTextSearchPageCount &&
-        dd($result);
-
-
-        //        $result = Verses::with('words')
-//            ->whereIn("id", $iDs)
-//            ->paginate($paginate, '*', '', 3);
-
-
-        exit;
-
-
-        dd($fullTextSearchPageCount);
-
-
-        echo "$query";
-        exit;
-
-
-//        $query = 'Allah';
-//        $results = collect();
-//
-//        $paths = array();
-//        $resources = Resource::where('type', Enum::resource_table_type['options'])
-//            ->where('sub_type', Enum::resource_table_subtype['translations'])
-//            ->with('source')->get();
-//        foreach ($resources as $resource) {
-//            $paths[$resource->id] = $resource->source->url;
-//        }
-//
-//
-//        foreach ($paths as $path) {
-//            $xml = simplexml_load_file($path);
-//            $information = $xml->information;
-//            $verses_xml = $xml->verses;
-//            foreach ($verses_xml->verse as $verse_xml) {
-//                if (preg_match('/\b' . $query . '(?=$|\s)/i', $verse_xml->text->__toString())) {
-//                    $verse_translation = collect();
-//                    $verse_translation->put('id', $verse_xml->id->__toString());
-//                    $verse_translation->put('language_name', $information->language_name->__toString());
-//                    $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
-//                    $verse_translation->put('text', $text);
-//                    $verse_translation->put('resource_name', $information->resource_name->__toString());
-//                    $verse_translation->put('resource_id', $information->resource_id->__toString());
-//                    $results = $results->push($verse_translation);
-//                }
-//            }
-//        }
-//
-//
-//        echo "<pre>";
-//        print_r($results);
-//        exit;
-//
-//        dd($results);
-
-
-        $records = Verses::search('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ')
-            ->get()
-            ->load('words');
-
-        $translationCount = Verses::with('words')
-            ->where("id", "<", "100")
-            ->get();
-
-
-        //$collection = $translationCount->merge($records);
-        $collection = $records;
-
-
-        dd($p);
-
-        return [
-            'status' => 'error',
-            'data' => $p,
-        ];
-
-//        dd($records->toArray());
-//
-//        //     ->union($items)
-//
-//        $items = Verses::with('words')
-//            // ->select(['chapter_id', 'verse_number', 'verse_index', 'verse_key', 'text_madani'])
-//            ->where("id", ">", "100");
-//        //->paginate(5);
-
-//        ->unionAll($records->getQuery())
-
-
-        $fullTextSearchCount = Verses::search('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ')->get()->count();
-        $translationCount = Verses::with('words')->where("id", "<", "100")->get()->count();
-
-        $totalPages = $fullTextSearchCount + $translationCount;
-        $totalPages = $totalPages / $paginate;
-        $totalPages = ceil($totalPages);
-        $totalPages = (int)$totalPages;
-
-
-        for ($i = 1; $i < $totalPages; $i++) {
-
-
-            $fullTextSearch = Verses::search('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ')->paginate($paginate, '', $i);
-
-            dd($fullTextSearch->lastPage());
-
-            echo $i;
-            echo "<br/>";
-        }
-        exit;
-
-
-        echo count($fullTextSearch);
-
-        //echo $records;
-        exit;
-
-
-        $records = Verses::search('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ')
-            //->whereIn("text_madani",["بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"])
-            // ->paginate(2)
-            ->get()
-            ->load('words');
-
-
-        dd($records->toArray());
-
-        //     ->union($items)
-
-        $items = Verses::with('words')
-            // ->select(['chapter_id', 'verse_number', 'verse_index', 'verse_key', 'text_madani'])
-            ->where("id", ">", "100");
-        //->paginate(5);
-
-
-        dd($records);
-
-//        $records = Verses::
-//        with('words')
-//
-
-
-        $items = Verses::with('words')
-            ->select(['chapter_id', 'verse_number', 'verse_index', 'verse_key', 'text_madani'])
-            ->where("id", "<", "100")
-            ->union($records)
-            ->paginate(5);
-
-
-        dd($items->toArray());
-
-
-        $slice = array_slice($items->toArray(), $paginate * ($page - 1), $paginate);
-
-
-        $result = Paginator::make($slice, count($items), $paginate);
-
-
-        dd($result->toArray());
-
-
-        $query = null;
-        $results = collect([]);
-        $result = null;
-        if (isset($request->q)) {
-            $query = $request->q;
-            if (preg_match("/:/", $query)) {
-                $result = Verses::select(
-                    'id',
-                    'verse_number',
-                    'chapter_id',
-                    'verse_key',
-                    'text_madani',
-                    'text_indopak',
-                    'text_simple',
-                    'juz_number',
-                    'hizb_number',
-                    'rub_number',
-                    'sajdah',
-                    'sajdah_number',
-                    'page_number')
-                    ->where('verse_key', $query)
-                    ->with('words')->get();
-                //$results = $results->push($result);
-                $results = $results->merge($result);
-            } else {
-                $result = Verses::select(
-                    'id',
-                    'verse_number',
-                    'chapter_id',
-                    'verse_key',
-                    'text_madani',
-                    'text_indopak',
-                    'text_simple',
-                    'juz_number',
-                    'hizb_number',
-                    'rub_number',
-                    'sajdah',
-                    'sajdah_number',
-                    'page_number')
-                    ->where('text_madani', 'like', '%' . $query . '%')
-                    ->orWhere('text_indopak', 'like', '%' . $query . '%')
-                    ->orWhere('text_simple', 'like', '%' . $query . '%')
-                    ->with('words')->get();
-                $results = $results->merge($result);
-
-                $paths = array();
-                $resources = Resource::where('type', Enum::resource_table_type['options'])
-                    ->where('sub_type', Enum::resource_table_subtype['translations'])
-                    ->with('source')->get();
                 foreach ($resources as $resource) {
                     $paths[$resource->id] = $resource->source->url;
                 }
-                foreach ($paths as $path) {
+                foreach($paths as $path){
                     $xml = simplexml_load_file($path);
                     $information = $xml->information;
                     $verses_xml = $xml->verses;
                     foreach ($verses_xml->verse as $verse_xml) {
-                        if (preg_match('/\b' . $query . '(?=$|\s)/i', $verse_xml->text->__toString())) {
+                        if(preg_match('/\b'.$query.'(?=$|\s)/', $verse_xml->text->__toString())){
                             $verse_translation = collect();
                             $verse_translation->put('id', $verse_xml->id->__toString());
                             $verse_translation->put('language_name', $information->language_name->__toString());
-                            $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
+                            $text = str_ireplace($query,'<em class="hlt1">'.$query.'</em>',$verse_xml->text->__toString());
                             $verse_translation->put('text', $text);
                             $verse_translation->put('resource_name', $information->resource_name->__toString());
                             $verse_translation->put('resource_id', $information->resource_id->__toString());
@@ -833,79 +414,56 @@ class APIController extends Controller
                     }
                 }
             }
+            return $results;
 
-        } else {
+        }
+        else
+        {
             return ['status' => 'error',
-                'data' => 'Please provide search query'];
+                    'data' => 'Please provide search query'];
         }
         $p = 1;
         $limit = 20;
-        if (isset($request->p)) {
+        if(isset($request->p)){
             $p = $request->p;
         }
-        if (isset($request->limit)) {
+        if(isset($request->limit)){
             $limit = $request->limit;
         }
         $count = count($results);
         $results = $results->chunk($limit);
         return ['query' => $query,
-            'total_count' => $count,
-            'current_page' => (int)$p,
-            'total_pages' => (int)($count / $limit) + 1,
-            'per_page' => (int)$limit,
-            'results' => $results[$p - 1]];
-    }
-
-
-    public function uniord($u)
-    {
-        // i just copied this function fron the php.net comments, but it should work fine!
-        $k = mb_convert_encoding($u, 'UCS-2LE', 'UTF-8');
-        $k1 = ord(substr($k, 0, 1));
-        $k2 = ord(substr($k, 1, 1));
-        return $k2 * 256 + $k1;
-    }
-
-    public function is_arabic($str)
-    {
-        if (mb_detect_encoding($str) !== 'UTF-8') {
-            $str = mb_convert_encoding($str, mb_detect_encoding($str), 'UTF-8');
-        }
-
-        /*
-        $str = str_split($str); <- this function is not mb safe, it splits by bytes, not characters. we cannot use it
-        $str = preg_split('//u',$str); <- this function woulrd probably work fine but there was a bug reported in some php version so it pslits by bytes and not chars as well
-        */
-        preg_match_all('/.|\n/u', $str, $matches);
-        $chars = $matches[0];
-        $arabic_count = 0;
-        $latin_count = 0;
-        $total_count = 0;
-        foreach ($chars as $char) {
-            //$pos = ord($char); we cant use that, its not binary safe
-            $pos = $this->uniord($char);
-            //echo $char . " --> " . $pos . PHP_EOL;
-
-            if ($pos >= 1536 && $pos <= 1791) {
-                $arabic_count++;
-            } else if ($pos > 123 && $pos < 123) {
-                $latin_count++;
-            }
-            $total_count++;
-        }
-        if (($arabic_count / $total_count) > 0.6) {
-            // 60% arabic chars, its probably arabic
-            return true;
-        }
-        return false;
+                'total_count' => $count,
+                'current_page' => (int)$p,
+                'total_pages' => (int)($count/$limit)+1,
+                'per_page' =>(int)$limit,
+                'results' => $results[$p-1]];
     }
 
     protected function test()
     {
-        $path = 'al-hasan-efendi.xml';
-        $xml = simplexml_load_file($path);
-        $results = $xml->xpath('//xml/verses/verse[id="421885"]');
-        return $results;
+        // $path = 'al-hasan-efendi.xml';
+        // $xml = simplexml_load_file($path);
+        // $results = $xml->xpath('//xml/verses/verse/text[contains(text()," mëdhenj ")]');
+        // return $results;
+        $page =1;
+        $perpage = 1;
+        $collection = collect([1,2,3,4,5,6,7,8,9,10]);
+        $t1 = "b";
+        $pagelinks = $this->makeLengthAware($collection , count($collection), $perpage,['t1' => $t1]);
+        return $pagelinks;
+    }
+
+    public static function makeLengthAware($collection, $total, $perPage, $appends = null)
+    {
+        $paginator = new LengthAwarePaginator(
+                $collection, $total, $perPage, Paginator::resolveCurrentPage(), ['path' => Paginator::resolveCurrentPath()]
+        );
+
+        if ($appends)
+            $paginator->appends($appends);
+
+        return str_replace('/?', '?', $paginator->render());
 
     }
 }
