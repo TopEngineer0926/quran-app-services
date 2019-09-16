@@ -268,7 +268,7 @@ class APIController extends Controller
      * @param int recitation: To select specfic recitation by id (Optional)
      * @return array audio_file/audio_files: array of recitaion audio/ audios if no recitation is provided
      */
-    protected function audio_files($id, $verse_id, Request $request)
+    protected function audio_file($id, $verse_id, Request $request)
     {
         $language = 'en';
         $recitations = null;
@@ -318,6 +318,63 @@ class APIController extends Controller
             }
             return ['audio_files' => $audio_files];
         }
+    }
+
+    /**
+     *Function gets audio files based on start and end verse_id range based in recitation id
+     *
+     * @author Muhammad Omer Saleh
+     * @param int id: To select chapter by id
+     * @param string language: To select specfic translation language (Optional)
+     * @param int recitation: To select specfic recitation by id
+     * @param int start: To select a start index for verse id
+     * @param int end: To select a end index for verse id
+     * @return array audio_files: array of recitaion audios
+     */
+
+    protected function audio_files(Request $request ,$id)
+    {
+        $language = 'en';
+        $recitation = null;
+        $start = null;
+        $end = null;
+        if(isset($request->start)&&isset($request->end)){
+            $start = $request->start;
+            $end = $request->end;
+        }
+        else{
+            return['status' => 'error',
+                    'data' => 'please select start and end range'];
+        }
+        $audio_files = array();
+        if (isset($request->language)) {
+            $language = Languages::where('iso_code', $language)->first();
+        }
+        if (isset($request->recitation)) {
+            $recitation = Recitations::where('id', $request->recitation)->first();
+            $path = $recitation->file_name;
+            $xml = simplexml_load_file($path);
+            $information = $xml->information;
+            $verses = $xml->verses;
+            foreach ($verses->verse as $verse) {
+                if ($verse->verse_id >= $start && $verse->chapter_id == $id && $verse->verse_id <= $end) {
+                    $audio_file = new AudioFile;
+                    $audio_file->url = $verse->url->__toString();
+                    $audio_file->duration = $verse->duration->__toString();
+                    $audio_file->segments = json_decode($verse->segments);
+                    $audio_file->format = $information->format->__toString();
+                    array_push($audio_files, $audio_file);
+                    if(count($audio_files)>=($end-$start+1)){
+                        break;
+                    }
+                }
+            }
+        }
+        else{
+            return['status' => 'error',
+                    'data' => 'no recitation selected'];
+        }
+            return ['audio_files' => $audio_files];
     }
 
     /**
@@ -475,6 +532,7 @@ class APIController extends Controller
 
     protected function search2(Request $request)
     {
+        $verse_ids = array();
         $limit = 20;
         $page = 1;
 
@@ -489,6 +547,9 @@ class APIController extends Controller
 
         // $query = 'Allah';
         $query = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+        if(isset($request->q)){
+            $query = $request->q;
+        }
         //$query = 'اللَّهِ';
         // $query = 'الله‎';
 
@@ -510,12 +571,16 @@ class APIController extends Controller
                     LIMIT 10 Offset 1";
 
 
-        $record = \DB::connection('mysql')->select(\DB::raw($sql_child));
+        $records = \DB::connection('mysql')->select(\DB::raw($sql_child));
 
+        foreach($records as $record)
+        {
+            array_push($verse_ids,$record->verse_id);
+        }
+        //return $verse_ids;
+        return $records;
 
-        dd($record);
-
-        $record = collect($record);
+        //$records = collect($records;
 //
 //
 //        $pageNo = 1;
