@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 /**
  * @property int $id
@@ -31,6 +32,10 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Verses extends Model
 {
+
+
+    use Searchable;
+
     /**
      * Indicates if the IDs are auto-incrementing.
      *
@@ -49,4 +54,28 @@ class Verses extends Model
     {
         return $this->hasMany('App\Models\Words', 'verse_id', 'id')->select(['id', 'verse_id', 'position', 'text_madani', 'text_indopak', 'text_simple', 'verse_key', 'class_name', 'line_number', 'page_number', 'code_hex', 'code as code_hex_v3', 'audio_url', 'char_type_id']);
     }
+
+
+    public function searchableAs()
+    {
+        return 'verses_text_madani';
+    }
+
+
+    public function toSearchableArray()
+    {
+
+
+//        $array = $this->toArray();
+//        // Customize array...
+//
+//        return $array;
+
+
+        $array = $this->toArray();
+
+        return array('text_madani' => $array['text_madani']);
+
+    }
+
 }

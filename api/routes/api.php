@@ -26,3 +26,5 @@ Route::get('/options/recitations', 'APIController@recitations')->name('api.recit
 Route::get('/options/translations', 'APIController@translations')->name('api.translations');
 Route::get('search', 'APIController@search')->name('api.search');
 Route::get('test', 'APIController@test')->name('api.test');
+
+Route::get('searchv2', 'APIController@search2')->name('api.search');

@@ -175,6 +175,10 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
+        Laravel\Scout\ScoutServiceProvider::class,
+        Yab\MySQLScout\Providers\MySQLScoutServiceProvider::class,
+
+
         Krlove\EloquentModelGenerator\Provider\GeneratorServiceProvider::class,
 
     ],
