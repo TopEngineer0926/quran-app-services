@@ -168,7 +168,8 @@ class APIController extends Controller
             'sajdah',
             'sajdah_number',
             'page_number'
-        )->with('words')
+        )->with('media_contents')
+        ->with('words')
             //->with('words.translation:translation_id,language_name,text,resource_name,resource_id')
             ->with('words.translation')
             //->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
@@ -474,6 +475,15 @@ class APIController extends Controller
 
     protected function search2(Request $request)
     {
+        $limit = 20;
+        $page = 1;
+
+        if (isset($request->p)) {
+            $page = $request->p;
+        }
+        if (isset($request->limit)) {
+            $limit = $request->limit;
+        }
 
         $finalResult = ['total-count', 'page_no', 'data'];
 
