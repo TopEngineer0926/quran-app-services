@@ -24,11 +24,14 @@ use App\Models\Author;
 use App\Models\MediaContents;
 use App\Models\Enum;
 use App\Models\CharTypes;
+use App\Models\VerseTranslations;
+use App\Models\Search;
 use DOMDocument;
 use Illuminate\Support\Facades\DB;
 use Storage;
 use XMLWriter;
 use Log;
+use Artisan;
 
 class ImportController extends Controller
 {
@@ -746,30 +749,29 @@ class ImportController extends Controller
 
     protected function chapter_resource()
     {
-        $names = TranslatedName::where('resource_type','languages')->get();
-        $loop =1 ;
-        foreach($names as $name)
-        {
-            $name->resource_id = Language::where('name',$name->name)->first()->id;
+        $names = TranslatedName::where('resource_type', 'languages')->get();
+        $loop = 1;
+        foreach ($names as $name) {
+            $name->resource_id = Language::where('name', $name->name)->first()->id;
             $name->language_priority = null;
             $name->save();
             $loop++;
         }
-        return $loop.' records updated successfully';
+        return $loop . ' records updated successfully';
     }
-    protected function translated_names(Request $request){
+    protected function translated_names(Request $request)
+    {
         $language = null;
-        if(isset($request->language)){
+        if (isset($request->language)) {
             $language = $request->language;
         }
         $url = Curl::url_chapters;
         $name = Curl::name_chapters;
-        $url = \str_replace("{language}",$language, $url);
+        $url = \str_replace("{language}", $language, $url);
         $curl = new Curl;
-        $results = $curl->curl($url,$name);
-        $language_id = Language::where('iso_code',$language)->first()->id;
-        foreach($results as $result)
-        {
+        $results = $curl->curl($url, $name);
+        $language_id = Language::where('iso_code', $language)->first()->id;
+        foreach ($results as $result) {
             $name = new TranslatedName;
             $name->resource_type = 'chapters';
             $name->resource_id = $result->id;
@@ -778,5 +780,73 @@ class ImportController extends Controller
             $name->language_name = $result->translated_name->language_name;
             $name->save();
         }
+    }
+
+    protected function verse_translations()
+    {
+        $count = 0;
+        $path = 'al-hasan-efendi.xml';
+        $xml = simplexml_load_file($path);
+        $verses_xml = $xml->verses;
+        $information = $xml->information;
+        foreach ($verses_xml->verse as $verse_xml) {
+            $count++;
+            $verse_t = new VerseTranslations;
+            $verse_t->id = $verse_xml->id->__toString();
+            $verse_t->verse_id = $verse_xml->verse_id->__toString();
+            $verse_t->text = $verse_xml->text->__toString();
+            $verse_t->author_id = 88;
+            $verse_t->save();
+        }
+        return $count .' records inserted';
+        //return VerseTranslations::where('text','LIKE','%Ata%')->get();
+    }
+    protected function search()
+    {
+        $paths = array();
+        $verses = Verses::get();
+        $resources = Resource::where('type', Enum::resource_table_type['options'])
+                    ->where('sub_type', Enum::resource_table_subtype['translations'])
+                    ->with('source')->get();
+        foreach ($resources as $resource) {
+            array_push($paths,$resource->source->url);
+        }
+        foreach($verses as $verse)
+        {
+            $count = 0;
+            $search = new Search;
+            $search->verse_id = $verse->id;
+            $search->content = $verse->text_madani;
+            $search->save();
+            $count++;
+            $search = new Search;
+            $search->verse_id = $verse->id;
+            $search->content = $verse->text_indopak;
+            $search->save();
+            $count++;
+            $search = new Search;
+            $search->verse_id = $verse->id;
+            $search->content = $verse->text_simple;
+            $search->save();
+            $count++;
+            foreach($paths as $path)
+            {
+                $xml = simplexml_load_file($path);
+                $verses_xml = $xml->verses;
+                foreach($verses_xml->verse as $verse_xml)
+                {
+                    if($verse_xml->verse_id == $verse->id)
+                    {
+                        $search = new Search;
+                        $search->verse_id = $verse->id;
+                        $search->content = $verse_xml->text->__toString();
+                        $search->save();
+                        $count++;
+                        break;
+                    }
+                }
+            }
+        }
+        return $count. ' records inserted';
     }
 }

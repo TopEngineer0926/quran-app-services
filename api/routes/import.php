@@ -27,3 +27,5 @@ Route::get('/translations', 'ImportController@translations')->name('import.trans
 Route::get('/update-code', 'ImportController@update_code')->name('import.update_code');
 Route::get('/chapter-resource', 'ImportController@chapter_resource')->name('import.chapter_resource');
 Route::get('/translated-names', 'ImportController@translated_names')->name('import.translated_names');
+Route::get('/verse-translations', 'ImportController@verse_translations')->name('import.verse_translations');
+Route::get('/search', 'ImportController@search')->name('import.search');
