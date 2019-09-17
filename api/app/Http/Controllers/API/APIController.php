@@ -138,7 +138,7 @@ class APIController extends Controller
      * @param int limit: Limit verses for current page (10 by default) (Optional)
      * @param int offset: set an offset to get verses
      * @param int recitation: gets recitation audio based on id
-     * @return array verses: in single array
+     * @return array verses: in single array (with audio files array if recitatiton is set)
      */
     protected function verses($id, Request $request)
     {
