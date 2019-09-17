@@ -196,7 +196,7 @@ class APIController extends Controller
                         break;
                     }
                 }
-                $verses->put('audio_files', $audio_files);
+                $verses->push('audio_files', $audio_files);
             }
             if (isset($request->translations)) {
                 $translations = array();
