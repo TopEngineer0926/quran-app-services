@@ -145,6 +145,7 @@ class APIController extends Controller
         $language = 'en';
         $limit = 10;
         $offset = 0;
+        $audio_files = array();
         if (isset($request->language)) {
             $language = $request->language;
         }
@@ -190,10 +191,12 @@ class APIController extends Controller
                         $audio_file->duration = $verse_xml->duration->__toString();
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
-                        $verse->setAttribute('audio', $audio_file);
+                        array_push($audio_files,$audio_file);
+                        //$verse->setAttribute('audio', $audio_file);
                         break;
                     }
                 }
+                $verses->put('audio_files',$audio_files);
             }
             if (isset($request->translations)) {
                 $translations = array();
@@ -433,25 +436,25 @@ class APIController extends Controller
                 //$results = $results->push($result);
                 $results = $results->merge($result);
             } else {
-                // $result = Verses::select(
-                //     'id',
-                //     'verse_number',
-                //     'chapter_id',
-                //     'verse_key',
-                //     'text_madani',
-                //     'text_indopak',
-                //     'text_simple',
-                //     'juz_number',
-                //     'hizb_number',
-                //     'rub_number',
-                //     'sajdah',
-                //     'sajdah_number',
-                //     'page_number')
-                //     ->where('text_madani','like','%'.$query.'%')
-                //     ->orWhere('text_indopak','like','%'.$query.'%')
-                //     ->orWhere('text_simple','like','%' .$query.'%')
-                //     ->with('words')->get();
-                //     $results = $results->merge($result);
+                $result = Verses::select(
+                    'id',
+                    'verse_number',
+                    'chapter_id',
+                    'verse_key',
+                    'text_madani',
+                    'text_indopak',
+                    'text_simple',
+                    'juz_number',
+                    'hizb_number',
+                    'rub_number',
+                    'sajdah',
+                    'sajdah_number',
+                    'page_number')
+                    ->where('text_madani','like','%'.$query.'%')
+                    ->orWhere('text_indopak','like','%'.$query.'%')
+                    ->orWhere('text_simple','like','%' .$query.'%')
+                    ->with('words')->get();
+                    $results = $results->merge($result);
 
                 $paths = array();
                 $resources = Resource::where('type', Enum::resource_table_type['options'])
@@ -555,7 +558,7 @@ class APIController extends Controller
 
 
         $sql_child = "SELECT
-                        verse_id,MATCH (content) AGAINST (
+                        verse_id,content,MATCH (content) AGAINST (
                             '$query' IN NATURAL LANGUAGE MODE
                         ) AS rank
                     FROM
@@ -565,20 +568,53 @@ class APIController extends Controller
                             '$query' IN NATURAL LANGUAGE MODE
                         )
                     GROUP BY
-                        verse_id,content
+                        verse_id
                     ORDER BY
                         rank DESC
-                    LIMIT 10 Offset 1";
+                    LIMIT $limit Offset $page";
 
 
         $records = \DB::connection('mysql')->select(\DB::raw($sql_child));
 
-        foreach($records as $record)
+        $sql_count = "SELECT count(*) AS count FROM(
+                SELECT
+                content,MATCH (content) AGAINST (
+                '$query' IN NATURAL LANGUAGE MODE
+                ) AS rank
+                FROM
+                search
+                WHERE
+                MATCH (content) AGAINST (
+                '$query' IN NATURAL LANGUAGE MODE
+                )
+                GROUP BY
+                verse_id) as count";
+        $total_count = \DB::connection('mysql')->select(\DB::raw($sql_count))[0]->count;
+        //return ['count' => $count, 'data' =>$records];
+
+        $previous_records = ($page-1)*$limit;
+
+        $total_pages = ceil($total_count/$limit);
+
+        foreach ($records as $record)
         {
             array_push($verse_ids,$record->verse_id);
         }
         //return $verse_ids;
-        return $records;
+        $results = Verses::select(
+            'id',
+            'verse_number',
+            'chapter_id',
+            'verse_key',
+            'text_madani',
+        )->whereIn('id',$verse_ids)
+        ->with('words')
+        ->with('words.translation')
+        ->with('words.transliteration')
+        ->with('words.chartype:id,name')
+        ->get();
+
+        return $results;
 
         //$records = collect($records;
 //
