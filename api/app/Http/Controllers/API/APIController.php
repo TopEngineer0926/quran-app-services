@@ -196,7 +196,7 @@ class APIController extends Controller
                         break;
                     }
                 }
-                $verses->push('audio_files', $audio_files);
+
             }
             if (isset($request->translations)) {
                 $translations = array();
@@ -224,6 +224,7 @@ class APIController extends Controller
                 $verse->setAttribute('translations', $translations);
             }
         }
+        $verses->put('audio_files', $audio_files);
         return ['verses' => $verses];
     }
 
