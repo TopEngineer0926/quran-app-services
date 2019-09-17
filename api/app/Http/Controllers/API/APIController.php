@@ -192,7 +192,6 @@ class APIController extends Controller
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
                         array_push($audio_files, $audio_file);
-                        //$verse->setAttribute('audio', $audio_file);
                         break;
                     }
                 }
@@ -215,8 +214,6 @@ class APIController extends Controller
                             $verse_translation->put('resource_name', $information->resource_name->__toString());
                             $verse_translation->put('resource_id', $information->resource_id->__toString());
                             array_push($translations, $verse_translation);
-                            //$verse->setAttribute('translation', $verse_translation);
-                            //$verse->setAttribute('transliteration', $verse_translation);
                             break;
                         }
                     }
@@ -224,8 +221,9 @@ class APIController extends Controller
                 $verse->setAttribute('translations', $translations);
             }
         }
-        $verses->put('audio_files', $audio_files);
-        return ['verses' => $verses];
+        //$verses->put('audio_files', $audio_files);
+        return ['verses' => $verses,
+                'audio_files' => $audio_files];
     }
 
     /**
