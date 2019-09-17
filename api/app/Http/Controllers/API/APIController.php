@@ -195,7 +195,6 @@ class APIController extends Controller
                         break;
                     }
                 }
-
             }
             if (isset($request->translations)) {
                 $translations = array();
@@ -222,8 +221,10 @@ class APIController extends Controller
             }
         }
         //$verses->put('audio_files', $audio_files);
-        return ['verses' => $verses,
-                'audio_files' => $audio_files];
+        return [
+            'verses' => $verses,
+            'audio_files' => $audio_files
+        ];
     }
 
     /**
@@ -542,214 +543,225 @@ class APIController extends Controller
     }
 
 
-    // protected function search2(Request $request)
-    // {
-    //     $verse_ids = array();
-    //     $limit = 20;
-    //     $page = 1;
+    protected function search2(Request $request)
+    {
+        $verse_ids = array();
+        $limit = 20;
+        $page = 1;
 
-    //     if (isset($request->p)) {
-    //         $page = $request->p;
-    //     }
-    //     if (isset($request->limit)) {
-    //         $limit = $request->limit;
-    //     }
+        if (isset($request->p)) {
+            $page = $request->p;
+        }
+        if (isset($request->limit)) {
+            $limit = $request->limit;
+        }
 
-    //     $finalResult = ['total-count', 'page_no', 'data'];
+        $finalResult = ['total-count', 'page_no', 'data'];
 
-    //     // $query = 'Allah';
-    //     $query = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-    //     if (isset($request->q)) {
-    //         $query = $request->q;
-    //     }
-    //     //$query = 'اللَّهِ';
-    //     // $query = 'الله‎';
-
-
-    //     $sql_child = "SELECT
-    //                     verse_id,content,MATCH (content) AGAINST (
-    //                         '$query' IN NATURAL LANGUAGE MODE
-    //                     ) AS rank
-    //                 FROM
-    //                     search
-    //                 WHERE
-    //                     MATCH (content) AGAINST (
-    //                         '$query' IN NATURAL LANGUAGE MODE
-    //                     )
-    //                 GROUP BY
-    //                     verse_id
-    //                 ORDER BY
-    //                     rank DESC
-    //                 LIMIT $limit Offset $page";
+        // $query = 'Allah';
+        $query = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+        if (isset($request->q)) {
+            $query = $request->q;
+        }
+        //$query = 'اللَّهِ';
+        // $query = 'الله‎';
 
 
-    //     $records = \DB::connection('mysql')->select(\DB::raw($sql_child));
-
-    //     $sql_count = "SELECT count(*) AS count FROM(
-    //             SELECT
-    //             content,MATCH (content) AGAINST (
-    //             '$query' IN NATURAL LANGUAGE MODE
-    //             ) AS rank
-    //             FROM
-    //             search
-    //             WHERE
-    //             MATCH (content) AGAINST (
-    //             '$query' IN NATURAL LANGUAGE MODE
-    //             )
-    //             GROUP BY
-    //             verse_id) as count";
-    //     $total_count = \DB::connection('mysql')->select(\DB::raw($sql_count))[0]->count;
-    //     //return ['count' => $count, 'data' =>$records];
-
-    //     $previous_records = ($page - 1) * $limit;
-
-    //     $total_pages = ceil($total_count / $limit);
-
-    //     foreach ($records as $record) {
-    //         array_push($verse_ids, $record->verse_id);
-    //     }
-    //     //return $verse_ids;
-    //     $results = Verses::select(
-    //         'id',
-    //         'verse_number',
-    //         'chapter_id',
-    //         'verse_key',
-    //         'text_madani',
-    //     )->whereIn('id', $verse_ids)
-    //         ->with('words')
-    //         ->with('words.translation')
-    //         ->with('words.transliteration')
-    //         ->with('words.chartype:id,name')
-    //         ->get();
-
-    //     return $results;
-
-    //     //$records = collect($records;
-    //     //
-    //     //
-    //     //        $pageNo = 1;
-    //     //        $paginate = 50;
-    //     //        $fullTextSearchCount = 0;
-    //     //        $fullTextSearchPageCount = 0;
-    //     //
-    //     ////        $fullTextSearchCount = Search::search($query)->get()->groupBy('verse_id')->count();
-    //     ////
-    //     ////        if (isset($fullTextSearchCount) && !empty($fullTextSearchCount)) {
-    //     ////            $fullTextSearchPageCount = ceil($fullTextSearchCount / $paginate);
-    //     ////            $fullTextSearchPageCount = (int)$fullTextSearchPageCount;
-    //     ////        }
-    //     //
-    //     //
-    //     //        \DB::enableQueryLog();
-    //     //
-    //     //        // $fullTextSearchCount = Search::search($query)->paginate($paginate, '', $pageNo);
-    //     //        $fullTextSearchCount = Search::search($query)->get()->groupBy('verse_id');
-    //     //
-    //     //
-    //     //        dd(\DB::getQueryLog());
-    //     //
-    //     //
-    //     //        dd($fullTextSearchCount->toArray());
-    //     //// ->load('words')
-    //     //
-    //     //
-    //     //        //dd($fullTextSearchPageCount);
-    //     //
-    //     //
-    //     //        $fullTextSearch = Search::search($query)->get()->groupBy('verse_id')->toArray();
-    //     //
-    //     //
-    //     //        $translationResult = [];
-    //     //        $translationResult = $this->translationRecord($query, true);
-    //     //        $translationCount = isset($translationResult['total_rec']) && !empty($translationResult['total_rec']) ? $translationResult['total_rec'] : 0;
-    //     //
-    //     //        $totalRecordCount = $totalPages = 0;
-    //     //        $totalRecordCount = $fullTextSearchPageCount + $translationCount;
-    //     //        $totalPages = ceil($totalRecordCount / $paginate);
-    //     //        $totalPages = (int)$totalPages;
-    //     //
-    //     //
-    //     //        $result = [];
-    //     //        if ($pageNo < ($fullTextSearchPageCount - 1)) {
-    //     //            $result = Verses::search($query)->paginate($paginate, '', $pageNo)->load('words');
-    //     //            $result = $result->toArray();
-    //     //
-    //     //        } else if ($pageNo == ($fullTextSearchPageCount)) {
-    //     //
-    //     //            $fullTextSearch = Verses::search($query)->paginate($paginate, '', $pageNo)->load('words');
-    //     //            $fullTextSearch = $fullTextSearch->toArray();
-    //     //
-    //     //
-    //     //            $moreNeedToFetch = $paginate;
-    //     //            $moreNeedToFetch = $paginate - count($fullTextSearch);
-    //     //
-    //     //
-    //     //            $result = Verses::with('words')
-    //     //                ->where("id", "<", "100")
-    //     //                ->paginate($moreNeedToFetch);
-    //     //            $result = $result->items();
-    //     //            foreach ($result as $r) {
-    //     //                $fullTextSearch[] = $r->toArray();
-    //     //
-    //     //            }
-    //     //
-    //     //        } else if ($pageNo > ($fullTextSearchPageCount)) {
-    //     //
-    //     //
-    //     //            $iDs = [];
-    //     //            $paths = array();
-    //     //            $resources = Resource::where('type', Enum::resource_table_type['options'])
-    //     //                ->where('sub_type', Enum::resource_table_subtype['translations'])
-    //     //                ->with('source')->get();
-    //     //            foreach ($resources as $resource) {
-    //     //                $paths[$resource->id] = $resource->source->url;
-    //     //            }
-    //     //
-    //     //            foreach ($paths as $path) {
-    //     //                $xml = simplexml_load_file($path);
-    //     //                $information = $xml->information;
-    //     //                $verses_xml = $xml->verses;
-    //     //                foreach ($verses_xml->verse as $verse_xml) {
-    //     //                    if (preg_match('/\b' . $query . '(?=$|\s)/i', $verse_xml->text->__toString())) {
-    //     //                        $verse_translation = collect();
-    //     //
-    //     //                        $iDs[$verse_xml->verse_id->__toString()] = $verse_xml->verse_id->__toString();
-    //     //                        $verse_translation->put('id', $verse_xml->id->__toString());
-    //     //                        $verse_translation->put('verse_id', $verse_xml->verse_id->__toString());
-    //     //                        $verse_translation->put('language_name', $information->language_name->__toString());
-    //     //                        $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
-    //     //                        $verse_translation->put('text', $text);
-    //     //                        $verse_translation->put('resource_name', $information->resource_name->__toString());
-    //     //                        $verse_translation->put('resource_id', $information->resource_id->__toString());
-    //     //
-    //     //
-    //     //                        //  $results = $results->push($verse_translation);
-    //     //                    }
-    //     //                }
-    //     //            }
-    //     //
-    //     //
-    //     //            $iDs = array_values($iDs);
-    //     //
-    //     //            $result = Verses::with('words')
-    //     //                ->whereIn("id", $iDs)
-    //     //                ->paginate($paginate, '*', '', 3);
-    //     //
-    //     //
-    //     //            $result = $result->items();
-    //     //            foreach ($result as $r) {
-    //     //                $fullTextSearch[] = $r->toArray();
-    //     //            }
-    //     //
-    //     //            $result = $fullTextSearch;
-    //     //
-    //     //
-    //     //        }
-    //     //
-    //     //
-    //     //        //$fullTextSearchPageCount &&
-    //     //        dd($result);
+        $sql_child = "SELECT
+                        verse_id,content,MATCH (content) AGAINST (
+                            '$query' IN NATURAL LANGUAGE MODE
+                        ) AS rank
+                    FROM
+                        search
+                    WHERE
+                        MATCH (content) AGAINST (
+                            '$query' IN NATURAL LANGUAGE MODE
+                        )
+                    GROUP BY
+                        verse_id
+                    ORDER BY
+                        rank DESC
+                    LIMIT $limit Offset $page";
 
 
-    // }
+        $records = \DB::connection('mysql')->select(\DB::raw($sql_child));
+
+        $sql_count = "SELECT count(*) AS count FROM(
+                SELECT
+                content,MATCH (content) AGAINST (
+                '$query' IN NATURAL LANGUAGE MODE
+                ) AS rank
+                FROM
+                search
+                WHERE
+                MATCH (content) AGAINST (
+                '$query' IN NATURAL LANGUAGE MODE
+                )
+                GROUP BY
+                verse_id) as count";
+        $total_count = \DB::connection('mysql')->select(\DB::raw($sql_count))[0]->count;
+        //return ['count' => $count, 'data' =>$records];
+
+        $previous_records = ($page - 1) * $limit;
+
+        $total_pages = ceil($total_count / $limit);
+
+        foreach ($records as $record) {
+            array_push($verse_ids, $record->verse_id);
+        }
+        //return $verse_ids;
+        $results = Verses::select(
+            'id',
+            'verse_number',
+            'chapter_id',
+            'verse_key',
+            'text_madani'
+        )->whereIn('id', $verse_ids)
+        //->with('translation')
+            ->with(['translation' => function ($q) use (&$query) {
+                $q->select('verse_id','text')->where('text', 'like', '%' . $query . '%');
+            }])
+            ->with('words')
+            ->with('words.translation')
+            ->with('words.transliteration')
+            ->with('words.chartype:id,name')
+            ->get();
+
+            foreach($results as $result)
+            {
+                if($result->translation){
+                $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
+                //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
+                }
+            }
+        return $results;
+
+        //$records = collect($records;
+        //
+        //
+        //        $pageNo = 1;
+        //        $paginate = 50;
+        //        $fullTextSearchCount = 0;
+        //        $fullTextSearchPageCount = 0;
+        //
+        ////        $fullTextSearchCount = Search::search($query)->get()->groupBy('verse_id')->count();
+        ////
+        ////        if (isset($fullTextSearchCount) && !empty($fullTextSearchCount)) {
+        ////            $fullTextSearchPageCount = ceil($fullTextSearchCount / $paginate);
+        ////            $fullTextSearchPageCount = (int)$fullTextSearchPageCount;
+        ////        }
+        //
+        //
+        //        \DB::enableQueryLog();
+        //
+        //        // $fullTextSearchCount = Search::search($query)->paginate($paginate, '', $pageNo);
+        //        $fullTextSearchCount = Search::search($query)->get()->groupBy('verse_id');
+        //
+        //
+        //        dd(\DB::getQueryLog());
+        //
+        //
+        //        dd($fullTextSearchCount->toArray());
+        //// ->load('words')
+        //
+        //
+        //        //dd($fullTextSearchPageCount);
+        //
+        //
+        //        $fullTextSearch = Search::search($query)->get()->groupBy('verse_id')->toArray();
+        //
+        //
+        //        $translationResult = [];
+        //        $translationResult = $this->translationRecord($query, true);
+        //        $translationCount = isset($translationResult['total_rec']) && !empty($translationResult['total_rec']) ? $translationResult['total_rec'] : 0;
+        //
+        //        $totalRecordCount = $totalPages = 0;
+        //        $totalRecordCount = $fullTextSearchPageCount + $translationCount;
+        //        $totalPages = ceil($totalRecordCount / $paginate);
+        //        $totalPages = (int)$totalPages;
+        //
+        //
+        //        $result = [];
+        //        if ($pageNo < ($fullTextSearchPageCount - 1)) {
+        //            $result = Verses::search($query)->paginate($paginate, '', $pageNo)->load('words');
+        //            $result = $result->toArray();
+        //
+        //        } else if ($pageNo == ($fullTextSearchPageCount)) {
+        //
+        //            $fullTextSearch = Verses::search($query)->paginate($paginate, '', $pageNo)->load('words');
+        //            $fullTextSearch = $fullTextSearch->toArray();
+        //
+        //
+        //            $moreNeedToFetch = $paginate;
+        //            $moreNeedToFetch = $paginate - count($fullTextSearch);
+        //
+        //
+        //            $result = Verses::with('words')
+        //                ->where("id", "<", "100")
+        //                ->paginate($moreNeedToFetch);
+        //            $result = $result->items();
+        //            foreach ($result as $r) {
+        //                $fullTextSearch[] = $r->toArray();
+        //
+        //            }
+        //
+        //        } else if ($pageNo > ($fullTextSearchPageCount)) {
+        //
+        //
+        //            $iDs = [];
+        //            $paths = array();
+        //            $resources = Resource::where('type', Enum::resource_table_type['options'])
+        //                ->where('sub_type', Enum::resource_table_subtype['translations'])
+        //                ->with('source')->get();
+        //            foreach ($resources as $resource) {
+        //                $paths[$resource->id] = $resource->source->url;
+        //            }
+        //
+        //            foreach ($paths as $path) {
+        //                $xml = simplexml_load_file($path);
+        //                $information = $xml->information;
+        //                $verses_xml = $xml->verses;
+        //                foreach ($verses_xml->verse as $verse_xml) {
+        //                    if (preg_match('/\b' . $query . '(?=$|\s)/i', $verse_xml->text->__toString())) {
+        //                        $verse_translation = collect();
+        //
+        //                        $iDs[$verse_xml->verse_id->__toString()] = $verse_xml->verse_id->__toString();
+        //                        $verse_translation->put('id', $verse_xml->id->__toString());
+        //                        $verse_translation->put('verse_id', $verse_xml->verse_id->__toString());
+        //                        $verse_translation->put('language_name', $information->language_name->__toString());
+        //                        $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
+        //                        $verse_translation->put('text', $text);
+        //                        $verse_translation->put('resource_name', $information->resource_name->__toString());
+        //                        $verse_translation->put('resource_id', $information->resource_id->__toString());
+        //
+        //
+        //                        //  $results = $results->push($verse_translation);
+        //                    }
+        //                }
+        //            }
+        //
+        //
+        //            $iDs = array_values($iDs);
+        //
+        //            $result = Verses::with('words')
+        //                ->whereIn("id", $iDs)
+        //                ->paginate($paginate, '*', '', 3);
+        //
+        //
+        //            $result = $result->items();
+        //            foreach ($result as $r) {
+        //                $fullTextSearch[] = $r->toArray();
+        //            }
+        //
+        //            $result = $fullTextSearch;
+        //
+        //
+        //        }
+        //
+        //
+        //        //$fullTextSearchPageCount &&
+        //        dd($result);
+
+
+    }
 }

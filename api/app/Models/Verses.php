@@ -65,6 +65,10 @@ class Verses extends Model
         return 'verses_text_madani';
     }
 
+    public function translation()
+    {
+        return $this->hasOne('App\Models\VerseTranslations','verse_id','id');
+    }
 
     public function toSearchableArray()
     {
