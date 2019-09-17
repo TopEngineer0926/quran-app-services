@@ -411,106 +411,106 @@ class APIController extends Controller
         return ['translations' => $results];
     }
 
-    protected function search(Request $request)
-    {
-        $query = null;
-        $results = collect([]);
-        $result = null;
-        if (isset($request->q)) {
-            $query = $request->q;
-            if (preg_match("/:/", $query)) {
-                $result = Verses::select(
-                    'id',
-                    'verse_number',
-                    'chapter_id',
-                    'verse_key',
-                    'text_madani',
-                    'text_indopak',
-                    'text_simple',
-                    'juz_number',
-                    'hizb_number',
-                    'rub_number',
-                    'sajdah',
-                    'sajdah_number',
-                    'page_number'
-                )
-                    ->where('verse_key', $query)
-                    ->with('words')->get();
-                //$results = $results->push($result);
-                $results = $results->merge($result);
-            } else {
-                $result = Verses::select(
-                    'id',
-                    'verse_number',
-                    'chapter_id',
-                    'verse_key',
-                    'text_madani',
-                    'text_indopak',
-                    'text_simple',
-                    'juz_number',
-                    'hizb_number',
-                    'rub_number',
-                    'sajdah',
-                    'sajdah_number',
-                    'page_number'
-                )
-                    ->where('text_madani', 'like', '%' . $query . '%')
-                    ->orWhere('text_indopak', 'like', '%' . $query . '%')
-                    ->orWhere('text_simple', 'like', '%' . $query . '%')
-                    ->with('words')->get();
-                $results = $results->merge($result);
+    // protected function search(Request $request)
+    // {
+    //     $query = null;
+    //     $results = collect([]);
+    //     $result = null;
+    //     if (isset($request->q)) {
+    //         $query = $request->q;
+    //         if (preg_match("/:/", $query)) {
+    //             $result = Verses::select(
+    //                 'id',
+    //                 'verse_number',
+    //                 'chapter_id',
+    //                 'verse_key',
+    //                 'text_madani',
+    //                 'text_indopak',
+    //                 'text_simple',
+    //                 'juz_number',
+    //                 'hizb_number',
+    //                 'rub_number',
+    //                 'sajdah',
+    //                 'sajdah_number',
+    //                 'page_number'
+    //             )
+    //                 ->where('verse_key', $query)
+    //                 ->with('words')->get();
+    //             //$results = $results->push($result);
+    //             $results = $results->merge($result);
+    //         } else {
+    //             $result = Verses::select(
+    //                 'id',
+    //                 'verse_number',
+    //                 'chapter_id',
+    //                 'verse_key',
+    //                 'text_madani',
+    //                 'text_indopak',
+    //                 'text_simple',
+    //                 'juz_number',
+    //                 'hizb_number',
+    //                 'rub_number',
+    //                 'sajdah',
+    //                 'sajdah_number',
+    //                 'page_number'
+    //             )
+    //                 ->where('text_madani', 'like', '%' . $query . '%')
+    //                 ->orWhere('text_indopak', 'like', '%' . $query . '%')
+    //                 ->orWhere('text_simple', 'like', '%' . $query . '%')
+    //                 ->with('words')->get();
+    //             $results = $results->merge($result);
 
-                $paths = array();
-                $resources = Resource::where('type', Enum::resource_table_type['options'])
-                    ->where('sub_type', Enum::resource_table_subtype['translations'])
-                    ->with('source')->get();
-                foreach ($resources as $resource) {
-                    $paths[$resource->id] = $resource->source->url;
-                }
-                foreach ($paths as $path) {
-                    $xml = simplexml_load_file($path);
-                    $information = $xml->information;
-                    $verses_xml = $xml->verses;
-                    foreach ($verses_xml->verse as $verse_xml) {
-                        if (preg_match('/\b' . $query . '(?=$|\s)/', $verse_xml->text->__toString())) {
-                            $verse_translation = collect();
-                            $verse_translation->put('id', $verse_xml->id->__toString());
-                            $verse_translation->put('language_name', $information->language_name->__toString());
-                            $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
-                            $verse_translation->put('text', $text);
-                            $verse_translation->put('resource_name', $information->resource_name->__toString());
-                            $verse_translation->put('resource_id', $information->resource_id->__toString());
-                            $results = $results->push($verse_translation);
-                        }
-                    }
-                }
-            }
-            return $results;
-        } else {
-            return [
-                'status' => 'error',
-                'data' => 'Please provide search query'
-            ];
-        }
-        $p = 1;
-        $limit = 20;
-        if (isset($request->p)) {
-            $p = $request->p;
-        }
-        if (isset($request->limit)) {
-            $limit = $request->limit;
-        }
-        $count = count($results);
-        $results = $results->chunk($limit);
-        return [
-            'query' => $query,
-            'total_count' => $count,
-            'current_page' => (int) $p,
-            'total_pages' => (int) ($count / $limit) + 1,
-            'per_page' => (int) $limit,
-            'results' => $results[$p - 1]
-        ];
-    }
+    //             $paths = array();
+    //             $resources = Resource::where('type', Enum::resource_table_type['options'])
+    //                 ->where('sub_type', Enum::resource_table_subtype['translations'])
+    //                 ->with('source')->get();
+    //             foreach ($resources as $resource) {
+    //                 $paths[$resource->id] = $resource->source->url;
+    //             }
+    //             foreach ($paths as $path) {
+    //                 $xml = simplexml_load_file($path);
+    //                 $information = $xml->information;
+    //                 $verses_xml = $xml->verses;
+    //                 foreach ($verses_xml->verse as $verse_xml) {
+    //                     if (preg_match('/\b' . $query . '(?=$|\s)/', $verse_xml->text->__toString())) {
+    //                         $verse_translation = collect();
+    //                         $verse_translation->put('id', $verse_xml->id->__toString());
+    //                         $verse_translation->put('language_name', $information->language_name->__toString());
+    //                         $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
+    //                         $verse_translation->put('text', $text);
+    //                         $verse_translation->put('resource_name', $information->resource_name->__toString());
+    //                         $verse_translation->put('resource_id', $information->resource_id->__toString());
+    //                         $results = $results->push($verse_translation);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         return $results;
+    //     } else {
+    //         return [
+    //             'status' => 'error',
+    //             'data' => 'Please provide search query'
+    //         ];
+    //     }
+    //     $p = 1;
+    //     $limit = 20;
+    //     if (isset($request->p)) {
+    //         $p = $request->p;
+    //     }
+    //     if (isset($request->limit)) {
+    //         $limit = $request->limit;
+    //     }
+    //     $count = count($results);
+    //     $results = $results->chunk($limit);
+    //     return [
+    //         'query' => $query,
+    //         'total_count' => $count,
+    //         'current_page' => (int) $p,
+    //         'total_pages' => (int) ($count / $limit) + 1,
+    //         'per_page' => (int) $limit,
+    //         'results' => $results[$p - 1]
+    //     ];
+    // }
 
     protected function test()
     {
@@ -543,8 +543,9 @@ class APIController extends Controller
     }
 
 
-    protected function search2(Request $request)
+    protected function search(Request $request)
     {
+        $start = microtime(true);
         $verse_ids = array();
         $limit = 20;
         $page = 1;
@@ -555,17 +556,11 @@ class APIController extends Controller
         if (isset($request->limit)) {
             $limit = $request->limit;
         }
-
-        $finalResult = ['total-count', 'page_no', 'data'];
-
-        // $query = 'Allah';
-        $query = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+        $query = null;
         if (isset($request->q)) {
             $query = $request->q;
         }
-        //$query = 'اللَّهِ';
-        // $query = 'الله‎';
-
+        $offset = ($page-1)*$limit;
 
         $sql_child = "SELECT
                         verse_id,content,MATCH (content) AGAINST (
@@ -581,8 +576,7 @@ class APIController extends Controller
                         verse_id
                     ORDER BY
                         rank DESC
-                    LIMIT $limit Offset $page";
-
+                    LIMIT $limit Offset $offset";
 
         $records = \DB::connection('mysql')->select(\DB::raw($sql_child));
 
@@ -600,7 +594,6 @@ class APIController extends Controller
                 GROUP BY
                 verse_id) as count";
         $total_count = \DB::connection('mysql')->select(\DB::raw($sql_count))[0]->count;
-        //return ['count' => $count, 'data' =>$records];
 
         $previous_records = ($page - 1) * $limit;
 
@@ -609,7 +602,7 @@ class APIController extends Controller
         foreach ($records as $record) {
             array_push($verse_ids, $record->verse_id);
         }
-        //return $verse_ids;
+
         $results = Verses::select(
             'id',
             'verse_number',
@@ -617,24 +610,31 @@ class APIController extends Controller
             'verse_key',
             'text_madani'
         )->whereIn('id', $verse_ids)
-        //->with('translation')
             ->with(['translation' => function ($q) use (&$query) {
-                $q->select('verse_id','text')->where('text', 'like', '%' . $query . '%');
+                $q->selectRaw('verse_id,text')->whereRaw("MATCH (verse_translations.text) AGAINST (
+                    '$query' IN NATURAL LANGUAGE MODE
+                    )");
             }])
             ->with('words')
             ->with('words.translation')
             ->with('words.transliteration')
             ->with('words.chartype:id,name')
             ->get();
-
-            foreach($results as $result)
-            {
-                if($result->translation){
-                $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
-                //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
-                }
-            }
-        return $results;
+            // foreach($results as $result)
+            // {
+            //     if($result->translation){
+            //     $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
+            //     //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
+            //     }
+            // }
+            $time = microtime(true) - $start;
+        return ['query' => $query,
+            'total_count' => $total_count,
+            'took' => number_format((float)$time, 2, '.', '').'s' ,
+            'current_page' => $page,
+            'total_pages' => $total_pages,
+            'per_page' => $limit,
+            'results' => $results];
 
         //$records = collect($records;
         //
