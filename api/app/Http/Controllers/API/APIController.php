@@ -613,8 +613,8 @@ class APIController extends Controller
             ->with(['translation' => function ($q) use (&$query) {
                 $q->selectRaw('verse_id,text,resource_id')->whereRaw("MATCH (verse_translations.text) AGAINST (
                     '$query' IN NATURAL LANGUAGE MODE
-                    )");
-            }])->with('translation.author_name')
+                    )")->with('author_name');
+            }])
             ->with('words')
             ->with('words.translation')
             ->with('words.transliteration')
