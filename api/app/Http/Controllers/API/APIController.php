@@ -363,7 +363,7 @@ class APIController extends Controller
             foreach ($verses->verse as $verse) {
                 if ($verse->verse_id >= $start && $verse->chapter_id == $id && $verse->verse_id <= $end) {
                     $audio_file = new AudioFile;
-                    $audio_file->url = $verse->url->__toString();
+                    $audio_file->url = Enum::url_audio . $information->base_url->__toString() . '/' . $verse->url->__toString();
                     $audio_file->duration = $verse->duration->__toString();
                     $audio_file->segments = json_decode($verse->segments);
                     $audio_file->format = $information->format->__toString();
@@ -595,8 +595,6 @@ class APIController extends Controller
                 verse_id) as count";
         $total_count = \DB::connection('mysql')->select(\DB::raw($sql_count))[0]->count;
 
-        $previous_records = ($page - 1) * $limit;
-
         $total_pages = ceil($total_count / $limit);
 
         foreach ($records as $record) {
@@ -611,10 +609,10 @@ class APIController extends Controller
             'text_madani'
         )->whereIn('id', $verse_ids)->orderByRaw(\DB::raw("FIELD(id, $verse_ids_ordered)"))
             ->with(['translation' => function ($q) use (&$query) {
-                $q->selectRaw('verse_id,text')->whereRaw("MATCH (verse_translations.text) AGAINST (
+                $q->selectRaw('verse_id,text,resource_id')->whereRaw("MATCH (verse_translations.text) AGAINST (
                     '$query' IN NATURAL LANGUAGE MODE
                     )");
-            }])
+            }])->with('translation.author_name')
             ->with('words')
             ->with('words.translation')
             ->with('words.transliteration')
