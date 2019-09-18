@@ -547,6 +547,7 @@ class APIController extends Controller
     {
         $start = microtime(true);
         $verse_ids = array();
+        $results = array();
         $limit = 20;
         $page = 1;
 
@@ -601,6 +602,7 @@ class APIController extends Controller
             array_push($verse_ids, $record->verse_id);
         }
         $verse_ids_ordered = implode(',', $verse_ids);
+        if($verse_ids){
         $results = Verses::select(
             'id',
             'verse_number',
@@ -618,18 +620,19 @@ class APIController extends Controller
             ->with('words.transliteration')
             ->with('words.chartype:id,name')
             ->get();
-            foreach($results as $result)
-            {
-                if($result->translation){
-                $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
-                //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
-                }
-            }
+        }
+            // foreach($results as $result)
+            // {
+            //     if($result->translation){
+            //     $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
+            //     //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
+            //     }
+            // }
             $time = microtime(true) - $start;
         return ['query' => $query,
             'total_count' => $total_count,
             'took' => number_format((float)$time, 2, '.', '').'s' ,
-            'current_page' => $page,
+            'current_page' => (int)$page,
             'total_pages' => $total_pages,
             'per_page' => $limit,
             'results' => $results];
