@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Enum;
 /**
  * @property int $id
  * @property int $verse_id
@@ -42,9 +42,6 @@ class Words extends Model
      * @var bool
      */
     public $incrementing = false;
-    // function __construct(){
-    //     $this->code_hex = html_entity_decode($this->code_hex, ENT_NOQUOTES);
-    // }
 
     /**
      * @var array
@@ -81,4 +78,10 @@ class Words extends Model
     {
         return $this->hasOne('App\Models\CharTypes','id','char_type_id');
     }
+    public function getAudioUrlAttribute($value) // mutator for audio_url for full path
+  {
+      if($this->attributes['audio_url']){
+      return $this->attributes['audio_url'] = Enum::url_audio.$value;
+      }
+  }
 }

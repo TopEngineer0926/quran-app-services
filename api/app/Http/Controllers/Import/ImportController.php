@@ -858,13 +858,19 @@ class ImportController extends Controller
         }
         return $count. ' records inserted';
     }
-    // protected function fixwbwaudiourl()
-    // {
-    //     $words = Words::get();
+    protected function fixwbwaudiourl()
+    {
+        $words = Words::get();
 
-    //     foreach($words as $word)
-    //     {
-    //         $word->audio_url =
-    //     }
-    // }
+        foreach($words as $word)
+        {
+            $url = $word->audio_url;
+            if($url){
+            $url = explode('/',$url);
+            $word->audio_url = $url[3].'/'.$url[4];
+            $word->save();
+            }
+        }
+
+    }
 }

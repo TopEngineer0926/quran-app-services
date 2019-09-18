@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
+use PhpParser\Node\Expr\AssignOp\Concat;
 
 /**
  * @property int $id
@@ -85,5 +86,6 @@ class Verses extends Model
         return array('text_madani' => $array['text_madani']);
 
     }
+
 
 }

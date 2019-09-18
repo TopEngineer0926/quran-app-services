@@ -29,3 +29,4 @@ Route::get('/chapter-resource', 'ImportController@chapter_resource')->name('impo
 Route::get('/translated-names', 'ImportController@translated_names')->name('import.translated_names');
 Route::get('/verse-translations', 'ImportController@verse_translations')->name('import.verse_translations');
 Route::get('/search', 'ImportController@search')->name('import.search');
+Route::get('/wbw-audio-url-fix', 'ImportController@fixwbwaudiourl')->name('import.fixwbwaudiourl');
