@@ -785,19 +785,28 @@ class ImportController extends Controller
     protected function verse_translations()
     {
         $count = 0;
-        $path = 'al-hasan-efendi.xml';
+        $paths = array();
+        $resources = Resource::where('type', Enum::resource_table_type['options'])
+                    ->where('sub_type', Enum::resource_table_subtype['translations'])
+                    ->with('source')->get();
+        foreach ($resources as $resource) {
+            array_push($paths,$resource->source->url);
+        }
+        foreach($paths as $path){
         $xml = simplexml_load_file($path);
         $verses_xml = $xml->verses;
         $information = $xml->information;
+        $resource_id = Resource::where('id',$information->resource_id)->first()->id;
         foreach ($verses_xml->verse as $verse_xml) {
             $count++;
             $verse_t = new VerseTranslations;
             $verse_t->id = $verse_xml->id->__toString();
             $verse_t->verse_id = $verse_xml->verse_id->__toString();
             $verse_t->text = $verse_xml->text->__toString();
-            $verse_t->author_id = 88;
+            $verse_t->resource_id = $resource_id;
             $verse_t->save();
         }
+    }
         return $count .' records inserted';
         //return VerseTranslations::where('text','LIKE','%Ata%')->get();
     }

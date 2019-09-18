@@ -575,7 +575,7 @@ class APIController extends Controller
                     GROUP BY
                         verse_id
                     ORDER BY
-                        rank DESC
+                        CAST(rank as signed)
                     LIMIT $limit Offset $offset";
 
         $records = \DB::connection('mysql')->select(\DB::raw($sql_child));
@@ -602,14 +602,14 @@ class APIController extends Controller
         foreach ($records as $record) {
             array_push($verse_ids, $record->verse_id);
         }
-
+        $verse_ids_ordered = implode(',', $verse_ids);
         $results = Verses::select(
             'id',
             'verse_number',
             'chapter_id',
             'verse_key',
             'text_madani'
-        )->whereIn('id', $verse_ids)
+        )->whereIn('id', $verse_ids)->orderByRaw(\DB::raw("FIELD(id, $verse_ids_ordered)"))
             ->with(['translation' => function ($q) use (&$query) {
                 $q->selectRaw('verse_id,text')->whereRaw("MATCH (verse_translations.text) AGAINST (
                     '$query' IN NATURAL LANGUAGE MODE
@@ -620,13 +620,13 @@ class APIController extends Controller
             ->with('words.transliteration')
             ->with('words.chartype:id,name')
             ->get();
-            // foreach($results as $result)
-            // {
-            //     if($result->translation){
-            //     $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
-            //     //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
-            //     }
-            // }
+            foreach($results as $result)
+            {
+                if($result->translation){
+                $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
+                //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
+                }
+            }
             $time = microtime(true) - $start;
         return ['query' => $query,
             'total_count' => $total_count,
