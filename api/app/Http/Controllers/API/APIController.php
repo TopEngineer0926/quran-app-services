@@ -657,7 +657,7 @@ class APIController extends Controller
                     GROUP BY
                         verse_id
                     ORDER BY
-                        CAST(rank as signed)
+                        rank DESC
                     LIMIT $limit Offset $offset";
 
         $records = \DB::connection('mysql')->select(\DB::raw($sql_child));
@@ -747,7 +747,7 @@ class APIController extends Controller
                             '$query' IN NATURAL LANGUAGE MODE
                         )
                     ORDER BY
-                        CAST(rank as signed)
+                        rank DESC
                     LIMIT 10 Offset 0";
         $records = \DB::connection('mysql')->select(\DB::raw($sql));
         $words_query = explode(" ", $query);
