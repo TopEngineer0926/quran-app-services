@@ -543,11 +543,19 @@ class APIController extends Controller
 
         return str_replace('/?', '?', $paginator->render());
     }
-
+/**
+     *Function gets search results based on query.
+     *
+     * @author Muhammad Omer Saleh (SQL Query by Faisal Mehmood)
+     * @param string q: Query to be searched
+     * @param int limit: To get custom search result limit on a page - Default is 20(Optional)
+     * @param int p: To get page by number of search results - Default is 1 (Optional)
+     * @return array results: verses with relevant translations and words and other output information
+     */
 
     protected function search(Request $request)
     {
-        $start = microtime(true);
+        $start = microtime(true); //start timer count
         $verse_ids = array();
         $results = array();
         $limit = 20;
@@ -601,11 +609,11 @@ class APIController extends Controller
         $total_pages = ceil($total_count / $limit);
 
         foreach ($records as $record) {
-            array_push($verse_ids, $record->verse_id);
+            array_push($verse_ids, $record->verse_id); // gets ids of verses from result
         }
         $verse_ids_ordered = implode(',', $verse_ids);
         if($verse_ids){
-        $results = Verses::select(
+        $results = Verses::select( // query to get verses and other related data
             'id',
             'verse_number',
             'chapter_id',
@@ -630,7 +638,7 @@ class APIController extends Controller
             //     //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
             //     }
             // }
-            $time = microtime(true) - $start;
+            $time = microtime(true) - $start; //end timer
         return ['query' => $query,
             'total_count' => $total_count,
             'took' => number_format((float)$time, 2, '.', '').'s' ,
