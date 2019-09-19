@@ -805,7 +805,7 @@ class APIController extends Controller
                     }
                         $suggest->put('text',$text);
                         $verse = Verses::select('chapter_id','verse_number','verse_key')->where('id',$record->verse_id)->first();
-                        $href = $verse->chapter_id.'/'.$verse->verse_number.'?translation='.$record->resource_id;
+                        $href = $verse->chapter_id.'/'.$verse->verse_number.'?translations[]='.$record->resource_id;
                         $suggest->put('href',$href);
                         $suggest->put('ayah',$verse->verse_key);
                         $suggests->push($suggest);
