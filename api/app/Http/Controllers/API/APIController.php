@@ -191,6 +191,7 @@ class APIController extends Controller
                         $audio_file->duration = $verse_xml->duration->__toString();
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
+                        $audio_file->title = 'Fatiah 001 - AbdulBaset AbdulSamad (Murattal)';
                         array_push($audio_files, $audio_file);
                         break;
                     }
