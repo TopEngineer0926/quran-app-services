@@ -730,6 +730,7 @@ class APIController extends Controller
     protected function suggest(Request $request)
     {
         $query = null;
+        $limit = 10;
         if(isset($request->q)){
             $query = $request->q;
         }
@@ -748,7 +749,7 @@ class APIController extends Controller
                         )
                     ORDER BY
                         rank DESC
-                    LIMIT 10 Offset 0";
+                    LIMIT $limit Offset 0";
         $records = \DB::connection('mysql')->select(\DB::raw($sql));
         $words_query = explode(" ", $query);
         $matches = array();
@@ -777,6 +778,39 @@ class APIController extends Controller
             $suggest->put('href',$record->href);
             $suggest->put('ayah',$record->verse_key);
             $suggests->push($suggest);
+        }
+            if(count($suggests)<$limit)
+            {
+                $limit = $limit-count($suggests);
+                $sql = "SELECT
+                    id,verse_id,text,MATCH (text) AGAINST (
+                        '$query' IN NATURAL LANGUAGE MODE
+                    ) AS rank
+                    FROM
+                        verse_translations
+                    WHERE
+                        MATCH (text) AGAINST (
+                            '$query' IN NATURAL LANGUAGE MODE
+                        )
+                    ORDER BY
+                        rank DESC
+                    LIMIT $limit Offset 0";
+
+                    $records = \DB::connection('mysql')->select(\DB::raw($sql));
+                    foreach($records as $record){
+                        $suggest = collect();
+                        $text = $record->text;
+                        foreach($words_query as $word_query){
+                        $text = preg_replace("/".$word_query."/i", "<em class='hlt1'>\$0</em>", $text);
+                    }
+                        $suggest->put('text',$text);
+                        $verse = Verses::select('chapter_id','verse_number','verse_key')->where('id',$record->verse_id)->first();
+                        $href = $verse->chapter_id.'/'.$verse->verse_number;
+                        $suggest->put('href',$href);
+                        $suggest->put('ayah',$verse->verse_key);
+                        $suggests->push($suggest);
+                    }
+
         }
         return $suggests;
     }
