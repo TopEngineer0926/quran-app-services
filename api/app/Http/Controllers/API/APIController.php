@@ -720,7 +720,13 @@ class APIController extends Controller
             'results' => $results
         ];
     }
-
+    /**
+     *Function gets search results based on query.
+     *
+     * @author Muhammad Omer Saleh
+     * @param string q: Query to be searched
+     * @return array results: verses with relevant translations and words and other output information
+     */
     protected function suggest(Request $request)
     {
         $query = null;
