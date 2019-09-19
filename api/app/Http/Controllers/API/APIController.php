@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Languages;
 use App\Models\Chapter;
-use App\Models\Search;
 use App\Models\ChapterInfos;
 use App\Models\TranslatedName;
 use App\Models\Verses;
@@ -14,13 +13,6 @@ use App\Models\Recitations;
 use App\Models\AudioFile;
 use App\Models\Resource;
 use App\Models\Enum;
-use App\Models\Words;
-use App\Models\CharTypes;
-use App\Models\WordTranslation;
-use App\Models\Translations;
-use Carbon;
-use DOMElement;
-use XMLWriter;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -171,9 +163,7 @@ class APIController extends Controller
             'page_number'
         )->with('media_contents')
             ->with('words')
-            //->with('words.translation:translation_id,language_name,text,resource_name,resource_id')
             ->with('words.translation')
-            //->with('words.transliteration:transliteration_id,language_name,text,resource_name,resource_id')
             ->with('words.transliteration')
             ->with('words.chartype:id,name')
             ->where('chapter_id', $id)->where('verse_number', '>=', $offset)->paginate($limit);
@@ -413,207 +403,6 @@ class APIController extends Controller
         return ['translations' => $results];
     }
 
-    // protected function search(Request $request)
-    // {
-    //     $query = null;
-    //     $results = collect([]);
-    //     $result = null;
-    //     if (isset($request->q)) {
-    //         $query = $request->q;
-    //         if (preg_match("/:/", $query)) {
-    //             $result = Verses::select(
-    //                 'id',
-    //                 'verse_number',
-    //                 'chapter_id',
-    //                 'verse_key',
-    //                 'text_madani',
-    //                 'text_indopak',
-    //                 'text_simple',
-    //                 'juz_number',
-    //                 'hizb_number',
-    //                 'rub_number',
-    //                 'sajdah',
-    //                 'sajdah_number',
-    //                 'page_number'
-    //             )
-    //                 ->where('verse_key', $query)
-    //                 ->with('words')->get();
-    //             //$results = $results->push($result);
-    //             $results = $results->merge($result);
-    //         } else {
-    //             $result = Verses::select(
-    //                 'id',
-    //                 'verse_number',
-    //                 'chapter_id',
-    //                 'verse_key',
-    //                 'text_madani',
-    //                 'text_indopak',
-    //                 'text_simple',
-    //                 'juz_number',
-    //                 'hizb_number',
-    //                 'rub_number',
-    //                 'sajdah',
-    //                 'sajdah_number',
-    //                 'page_number'
-    //             )
-    //                 ->where('text_madani', 'like', '%' . $query . '%')
-    //                 ->orWhere('text_indopak', 'like', '%' . $query . '%')
-    //                 ->orWhere('text_simple', 'like', '%' . $query . '%')
-    //                 ->with('words')->get();
-    //             $results = $results->merge($result);
-
-    //             $paths = array();
-    //             $resources = Resource::where('type', Enum::resource_table_type['options'])
-    //                 ->where('sub_type', Enum::resource_table_subtype['translations'])
-    //                 ->with('source')->get();
-    //             foreach ($resources as $resource) {
-    //                 $paths[$resource->id] = $resource->source->url;
-    //             }
-    //             foreach ($paths as $path) {
-    //                 $xml = simplexml_load_file($path);
-    //                 $information = $xml->information;
-    //                 $verses_xml = $xml->verses;
-    //                 foreach ($verses_xml->verse as $verse_xml) {
-    //                     if (preg_match('/\b' . $query . '(?=$|\s)/', $verse_xml->text->__toString())) {
-    //                         $verse_translation = collect();
-    //                         $verse_translation->put('id', $verse_xml->id->__toString());
-    //                         $verse_translation->put('language_name', $information->language_name->__toString());
-    //                         $text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $verse_xml->text->__toString());
-    //                         $verse_translation->put('text', $text);
-    //                         $verse_translation->put('resource_name', $information->resource_name->__toString());
-    //                         $verse_translation->put('resource_id', $information->resource_id->__toString());
-    //                         $results = $results->push($verse_translation);
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         return $results;
-    //     } else {
-    //         return [
-    //             'status' => 'error',
-    //             'data' => 'Please provide search query'
-    //         ];
-    //     }
-    //     $p = 1;
-    //     $limit = 20;
-    //     if (isset($request->p)) {
-    //         $p = $request->p;
-    //     }
-    //     if (isset($request->limit)) {
-    //         $limit = $request->limit;
-    //     }
-    //     $count = count($results);
-    //     $results = $results->chunk($limit);
-    //     return [
-    //         'query' => $query,
-    //         'total_count' => $count,
-    //         'current_page' => (int) $p,
-    //         'total_pages' => (int) ($count / $limit) + 1,
-    //         'per_page' => (int) $limit,
-    //         'results' => $results[$p - 1]
-    //     ];
-    // }
-
-    protected function test()
-    {
-        // // $path = 'al-hasan-efendi.xml';
-        // // $xml = simplexml_load_file($path);
-        // // $results = $xml->xpath('//xml/verses/verse/text[contains(text()," mëdhenj ")]');
-        // // return $results;
-        // $page = 1;
-        // $perpage = 1;
-        // $collection = collect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-        // $t1 = "b";
-        // $pagelinks = $this->makeLengthAware($collection, count($collection), $perpage, ['t1' => $t1]);
-        // return $pagelinks;
-        //$string1 = 'بسم الله الرحمن الرحيم';
-        $query = "مالك يوم الدين";
-
-        $suggests = collect();
-        //$query = "بسم الله الرحمن الرحيم";
-
-        $sql = "SELECT
-                    id,text_madani,text_indopak,text_simple,verse_key,MATCH (text_madani) AGAINST (
-                        '$query' IN NATURAL LANGUAGE MODE
-                    ) AS rank,CONCAT_WS('/',chapter_id,verse_number) AS href
-                    FROM
-                        verses
-                    WHERE
-                        MATCH (text_madani) AGAINST (
-                            '$query' IN NATURAL LANGUAGE MODE
-                        )
-                    ORDER BY
-                        CAST(rank as signed)
-                    LIMIT 10 Offset 0";
-        $records = \DB::connection('mysql')->select(\DB::raw($sql));
-        $words_query = explode(" ", $query);
-        $matches = array();
-        foreach ($records as $record) {
-            $words_text_madani = explode(" ", $record->text_madani);
-            $words_text_indopak = explode(" ", $record->text_indopak);
-            $words_text_simple = explode(" ", $record->text_simple);
-            foreach ($words_query as $word_query) {
-                $match = array_search($word_query, $words_text_madani );
-                if ($match !== false) {
-                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
-                 }
-                 $match = array_search($word_query, $words_text_indopak);
-                if ($match!== false) {
-                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
-                 }
-                 $match = array_search($word_query, $words_text_simple);
-                if ($match!== false) {
-                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
-                 }
-            }
-            //array_push($matches,implode(" ",$words_text_madani));
-            $text = implode(" ",$words_text_madani);
-            $suggest = collect();
-            $suggest->put('text',$text);
-            $suggest->put('href',$record->href);
-            $suggest->put('ayah',$record->verse_key);
-            $suggests->push($suggest);
-        }
-        return $suggests;
-        $results = array();
-        foreach($matches as $match){
-            array_push($results,implode(" ",$match));
-        }
-        return $results;
-        $string1 = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-        $needle = 'الرَّحْمَٰنِ';
-        $string = explode(" ", $string1);
-        //$result = in_array ( 'بِسْمِ',$string );
-        //$result =stripos($string1,$needle);
-        $result = array_search($needle, $string);
-        //$result =array_keys($string,$string[0]);
-
-        return (int) $result;
-        $string2 = 'بسم الله الرحمن الرحيم';
-        mb_regex_encoding('UTF-8');
-        //$string2 = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
-        //echo preg_match("/\b$string1\b/i", $string2, $match);
-        //echo strnatcmp ( $string1 , $string2 );
-        echo mb_ereg("[\x{0600}-\x{06FF}]", $string1);
-        //return $match;
-        //echo strcmp($string1,$string2);;
-    }
-
-    public static function makeLengthAware($collection, $total, $perPage, $appends = null)
-    {
-        $paginator = new LengthAwarePaginator(
-            $collection,
-            $total,
-            $perPage,
-            Paginator::resolveCurrentPage(),
-            ['path' => Paginator::resolveCurrentPath()]
-        );
-
-        if ($appends)
-            $paginator->appends($appends);
-
-        return str_replace('/?', '?', $paginator->render());
-    }
     /**
      *Function gets search results based on query.
      *
@@ -721,7 +510,7 @@ class APIController extends Controller
         ];
     }
     /**
-     *Function gets search results based on query.
+     *Function gets suggestion based on query string
      *
      * @author Muhammad Omer Saleh
      * @param string q: Query to be searched
@@ -771,7 +560,6 @@ class APIController extends Controller
                     $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
                  }
             }
-            //array_push($matches,implode(" ",$words_text_madani));
             $text = implode(" ",$words_text_madani);
             $suggest = collect();
             $suggest->put('text',$text);
