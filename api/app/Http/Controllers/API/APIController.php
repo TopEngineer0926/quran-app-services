@@ -620,7 +620,7 @@ class APIController extends Controller
             'verse_key',
             'text_madani'
         )->whereIn('id', $verse_ids)->orderByRaw(\DB::raw("FIELD(id, $verse_ids_ordered)"))
-            ->with(['translation' => function ($q) use (&$query) {
+            ->with(['translations' => function ($q) use (&$query) {
                 $q->selectRaw('verse_id,text,resource_id')->whereRaw("MATCH (verse_translations.text) AGAINST (
                     '$query' IN NATURAL LANGUAGE MODE
                     )")->with('author_name');
