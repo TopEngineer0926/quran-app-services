@@ -783,7 +783,7 @@ class APIController extends Controller
             {
                 $limit = $limit-count($suggests);
                 $sql = "SELECT
-                    id,verse_id,text,MATCH (text) AGAINST (
+                    id,verse_id,text,resource_id,MATCH (text) AGAINST (
                         '$query' IN NATURAL LANGUAGE MODE
                     ) AS rank
                     FROM
@@ -805,7 +805,7 @@ class APIController extends Controller
                     }
                         $suggest->put('text',$text);
                         $verse = Verses::select('chapter_id','verse_number','verse_key')->where('id',$record->verse_id)->first();
-                        $href = $verse->chapter_id.'/'.$verse->verse_number;
+                        $href = $verse->chapter_id.'/'.$verse->verse_number.'?translation='.$record->resource_id;
                         $suggest->put('href',$href);
                         $suggest->put('ayah',$verse->verse_key);
                         $suggests->push($suggest);
