@@ -177,7 +177,7 @@ class APIController extends Controller
             ->with('words.transliteration')
             ->with('words.chartype:id,name')
             ->where('chapter_id', $id)->where('verse_number', '>=', $offset)->paginate($limit);
-            $chapter_name = Chapter::where('id',$verses->first()->chapter_id)->first()->name_complex;
+        $chapter_name = Chapter::where('id', $verses->first()->chapter_id)->first()->name_complex;
         foreach ($verses as $verse) {
             if (isset($request->recitation)) {
                 $recitation = Recitations::where('id', $request->recitation)->first();
@@ -192,7 +192,7 @@ class APIController extends Controller
                         $audio_file->duration = $verse_xml->duration->__toString();
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
-                        $audio_file->title = $chapter_name.' '.str_pad($verse->verse_number,3,"0",STR_PAD_LEFT).' - '.$information->reciter_name->__toString();
+                        $audio_file->title = $chapter_name . ' ' . str_pad($verse->verse_number, 3, "0", STR_PAD_LEFT) . ' - ' . $information->reciter_name->__toString();
                         array_push($audio_files, $audio_file);
                         break;
                     }
@@ -516,16 +516,87 @@ class APIController extends Controller
 
     protected function test()
     {
-        // $path = 'al-hasan-efendi.xml';
-        // $xml = simplexml_load_file($path);
-        // $results = $xml->xpath('//xml/verses/verse/text[contains(text()," mëdhenj ")]');
-        // return $results;
-        $page = 1;
-        $perpage = 1;
-        $collection = collect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
-        $t1 = "b";
-        $pagelinks = $this->makeLengthAware($collection, count($collection), $perpage, ['t1' => $t1]);
-        return $pagelinks;
+        // // $path = 'al-hasan-efendi.xml';
+        // // $xml = simplexml_load_file($path);
+        // // $results = $xml->xpath('//xml/verses/verse/text[contains(text()," mëdhenj ")]');
+        // // return $results;
+        // $page = 1;
+        // $perpage = 1;
+        // $collection = collect([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        // $t1 = "b";
+        // $pagelinks = $this->makeLengthAware($collection, count($collection), $perpage, ['t1' => $t1]);
+        // return $pagelinks;
+        //$string1 = 'بسم الله الرحمن الرحيم';
+        $query = "مالك يوم الدين";
+
+        $suggests = collect();
+        //$query = "بسم الله الرحمن الرحيم";
+
+        $sql = "SELECT
+                    id,text_madani,text_indopak,text_simple,verse_key,MATCH (text_madani) AGAINST (
+                        '$query' IN NATURAL LANGUAGE MODE
+                    ) AS rank,CONCAT_WS('/',chapter_id,verse_number) AS href
+                    FROM
+                        verses
+                    WHERE
+                        MATCH (text_madani) AGAINST (
+                            '$query' IN NATURAL LANGUAGE MODE
+                        )
+                    ORDER BY
+                        CAST(rank as signed)
+                    LIMIT 10 Offset 0";
+        $records = \DB::connection('mysql')->select(\DB::raw($sql));
+        $words_query = explode(" ", $query);
+        $matches = array();
+        foreach ($records as $record) {
+            $words_text_madani = explode(" ", $record->text_madani);
+            $words_text_indopak = explode(" ", $record->text_indopak);
+            $words_text_simple = explode(" ", $record->text_simple);
+            foreach ($words_query as $word_query) {
+                $match = array_search($word_query, $words_text_madani );
+                if ($match !== false) {
+                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
+                 }
+                 $match = array_search($word_query, $words_text_indopak);
+                if ($match!== false) {
+                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
+                 }
+                 $match = array_search($word_query, $words_text_simple);
+                if ($match!== false) {
+                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
+                 }
+            }
+            //array_push($matches,implode(" ",$words_text_madani));
+            $text = implode(" ",$words_text_madani);
+            $suggest = collect();
+            $suggest->put('text',$text);
+            $suggest->put('href',$record->href);
+            $suggest->put('ayah',$record->verse_key);
+            $suggests->push($suggest);
+        }
+        return $suggests;
+        $results = array();
+        foreach($matches as $match){
+            array_push($results,implode(" ",$match));
+        }
+        return $results;
+        $string1 = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+        $needle = 'الرَّحْمَٰنِ';
+        $string = explode(" ", $string1);
+        //$result = in_array ( 'بِسْمِ',$string );
+        //$result =stripos($string1,$needle);
+        $result = array_search($needle, $string);
+        //$result =array_keys($string,$string[0]);
+
+        return (int) $result;
+        $string2 = 'بسم الله الرحمن الرحيم';
+        mb_regex_encoding('UTF-8');
+        //$string2 = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+        //echo preg_match("/\b$string1\b/i", $string2, $match);
+        //echo strnatcmp ( $string1 , $string2 );
+        echo mb_ereg("[\x{0600}-\x{06FF}]", $string1);
+        //return $match;
+        //echo strcmp($string1,$string2);;
     }
 
     public static function makeLengthAware($collection, $total, $perPage, $appends = null)
@@ -543,7 +614,7 @@ class APIController extends Controller
 
         return str_replace('/?', '?', $paginator->render());
     }
-/**
+    /**
      *Function gets search results based on query.
      *
      * @author Muhammad Omer Saleh (SQL Query by Faisal Mehmood)
@@ -571,7 +642,7 @@ class APIController extends Controller
         if (isset($request->q)) {
             $query = $request->q;
         }
-        $offset = ($page-1)*$limit;
+        $offset = ($page - 1) * $limit;
 
         $sql_child = "SELECT
                         verse_id,content,MATCH (content) AGAINST (
@@ -612,39 +683,95 @@ class APIController extends Controller
             array_push($verse_ids, $record->verse_id); // gets ids of verses from result
         }
         $verse_ids_ordered = implode(',', $verse_ids);
-        if($verse_ids){
-        $results = Verses::select( // query to get verses and other related data
-            'id',
-            'verse_number',
-            'chapter_id',
-            'verse_key',
-            'text_madani'
-        )->whereIn('id', $verse_ids)->orderByRaw(\DB::raw("FIELD(id, $verse_ids_ordered)"))
-            ->with(['translations' => function ($q) use (&$query) {
-                $q->selectRaw('verse_id,text,resource_id')->whereRaw("MATCH (verse_translations.text) AGAINST (
+        if ($verse_ids) {
+            $results = Verses::select( // query to get verses and other related data
+                'id',
+                'verse_number',
+                'chapter_id',
+                'verse_key',
+                'text_madani'
+            )->whereIn('id', $verse_ids)->orderByRaw(\DB::raw("FIELD(id, $verse_ids_ordered)"))
+                ->with(['translations' => function ($q) use (&$query) {
+                    $q->selectRaw('verse_id,text,resource_id')->whereRaw("MATCH (verse_translations.text) AGAINST (
                     '$query' IN NATURAL LANGUAGE MODE
                     )")->with('author_name');
-            }])
-            ->with('words')
-            ->with('words.translation')
-            ->with('words.transliteration')
-            ->with('words.chartype:id,name')
-            ->get();
+                }])
+                ->with('words')
+                ->with('words.translation')
+                ->with('words.transliteration')
+                ->with('words.chartype:id,name')
+                ->get();
         }
-            // foreach($results as $result)
-            // {
-            //     if($result->translation){
-            //     $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
-            //     //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
-            //     }
-            // }
-            $time = microtime(true) - $start; //end timer
-        return ['query' => $query,
+        // foreach($results as $result)
+        // {
+        //     if($result->translation){
+        //     $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
+        //     //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
+        //     }
+        // }
+        $time = microtime(true) - $start; //end timer
+        return [
+            'query' => $query,
             'total_count' => $total_count,
-            'took' => number_format((float)$time, 2, '.', '').'s' ,
-            'current_page' => (int)$page,
+            'took' => number_format((float) $time, 2, '.', '') . 's',
+            'current_page' => (int) $page,
             'total_pages' => $total_pages,
             'per_page' => $limit,
-            'results' => $results];
+            'results' => $results
+        ];
+    }
+
+    protected function suggest(Request $request)
+    {
+        $query = null;
+        if(isset($request->q)){
+            $query = $request->q;
+        }
+        $suggests = collect();
+        //$query = "بسم الله الرحمن الرحيم";
+
+        $sql = "SELECT
+                    id,text_madani,text_indopak,text_simple,verse_key,MATCH (text_madani) AGAINST (
+                        '$query' IN NATURAL LANGUAGE MODE
+                    ) AS rank,CONCAT_WS('/',chapter_id,verse_number) AS href
+                    FROM
+                        verses
+                    WHERE
+                        MATCH (text_madani) AGAINST (
+                            '$query' IN NATURAL LANGUAGE MODE
+                        )
+                    ORDER BY
+                        CAST(rank as signed)
+                    LIMIT 10 Offset 0";
+        $records = \DB::connection('mysql')->select(\DB::raw($sql));
+        $words_query = explode(" ", $query);
+        $matches = array();
+        foreach ($records as $record) {
+            $words_text_madani = explode(" ", $record->text_madani);
+            $words_text_indopak = explode(" ", $record->text_indopak);
+            $words_text_simple = explode(" ", $record->text_simple);
+            foreach ($words_query as $word_query) {
+                $match = array_search($word_query, $words_text_madani );
+                if ($match !== false) {
+                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
+                 }
+                 $match = array_search($word_query, $words_text_indopak);
+                if ($match!== false) {
+                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
+                 }
+                 $match = array_search($word_query, $words_text_simple);
+                if ($match!== false) {
+                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
+                 }
+            }
+            //array_push($matches,implode(" ",$words_text_madani));
+            $text = implode(" ",$words_text_madani);
+            $suggest = collect();
+            $suggest->put('text',$text);
+            $suggest->put('href',$record->href);
+            $suggest->put('ayah',$record->verse_key);
+            $suggests->push($suggest);
+        }
+        return $suggests;
     }
 }
