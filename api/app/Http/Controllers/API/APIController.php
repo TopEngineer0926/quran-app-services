@@ -177,6 +177,7 @@ class APIController extends Controller
             ->with('words.transliteration')
             ->with('words.chartype:id,name')
             ->where('chapter_id', $id)->where('verse_number', '>=', $offset)->paginate($limit);
+            $chapter_name = Chapter::where('id',$verses->first()->chapter_id)->first()->name_complex;
         foreach ($verses as $verse) {
             if (isset($request->recitation)) {
                 $recitation = Recitations::where('id', $request->recitation)->first();
@@ -191,7 +192,7 @@ class APIController extends Controller
                         $audio_file->duration = $verse_xml->duration->__toString();
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
-                        $audio_file->title = 'Fatiah 001 - AbdulBaset AbdulSamad (Murattal)';
+                        $audio_file->title = $chapter_name.' '.str_pad($verse->verse_number,3,"0",STR_PAD_LEFT).' - '.$information->reciter_name->__toString();
                         array_push($audio_files, $audio_file);
                         break;
                     }
