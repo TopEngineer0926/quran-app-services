@@ -180,7 +180,7 @@ class APIController extends Controller
                         $audio_file = new AudioFile;
                         $audio_file->url = Enum::url_audio . $information->base_url->__toString() . '/' . $verse_xml->url->__toString();
                         $audio_file->duration = $verse_xml->duration->__toString();
-                        $audio_file->segments = json_decode($verse_xml->segments);
+                        $audio_file->segments = json_decode($verse_xml->segments,true);
                         $audio_file->format = $information->format->__toString();
                         $audio_file->title = $chapter_name . ' ' . str_pad($verse->verse_number, 3, "0", STR_PAD_LEFT) . ' - ' . $information->reciter_name->__toString();
                         $verse->setAttribute('audio', $audio_file);
@@ -492,7 +492,7 @@ class APIController extends Controller
                 ->with('words.chartype:id,name')
                 ->get();
         }
-        $words_query = explode(" ", $query); // $text = preg_replace("/".$word_query."/i", "<em class='hlt1'>\$0</em>", $text);
+        $words_query = explode(" ", $query);
         foreach ($results as $result) {
             foreach ($result->translations as $translation) {
                 foreach ($words_query as $word_query) {

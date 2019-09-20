@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
-use PhpParser\Node\Expr\AssignOp\Concat;
 
 /**
  * @property int $id
@@ -73,13 +72,6 @@ class Verses extends Model
 
     public function toSearchableArray()
     {
-
-
-//        $array = $this->toArray();
-//        // Customize array...
-//
-//        return $array;
-
 
         $array = $this->toArray();
 
