@@ -183,6 +183,7 @@ class APIController extends Controller
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
                         $audio_file->title = $chapter_name . ' ' . str_pad($verse->verse_number, 3, "0", STR_PAD_LEFT) . ' - ' . $information->reciter_name->__toString();
+                        $verse->setAttribute('audio',$audio_file);
                         array_push($audio_files, $audio_file);
                         break;
                     }
@@ -491,13 +492,23 @@ class APIController extends Controller
                 ->with('words.chartype:id,name')
                 ->get();
         }
-        // foreach($results as $result)
-        // {
+        $words_query = explode(" ",$query);
+        foreach($results as $result)
+        {
+
+            foreach($result->words as $word){
+                if(in_array($word->text_madani,$words_query) || in_array($word->text_simple,$words_query)){
+                    $word->setAttribute('highlight','hlt1');
+                }
+                else{
+                    $word->setAttribute('highlight', null);
+                }
+            }
         //     if($result->translation){
         //     $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
         //     //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
         //     }
-        // }
+        }
         $time = microtime(true) - $start; //end timer
         return [
             'query' => $query,
