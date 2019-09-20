@@ -183,7 +183,7 @@ class APIController extends Controller
                         $audio_file->segments = json_decode($verse_xml->segments);
                         $audio_file->format = $information->format->__toString();
                         $audio_file->title = $chapter_name . ' ' . str_pad($verse->verse_number, 3, "0", STR_PAD_LEFT) . ' - ' . $information->reciter_name->__toString();
-                        $verse->setAttribute('audio',$audio_file);
+                        $verse->setAttribute('audio', $audio_file);
                         array_push($audio_files, $audio_file);
                         break;
                     }
@@ -492,22 +492,21 @@ class APIController extends Controller
                 ->with('words.chartype:id,name')
                 ->get();
         }
-        $words_query = explode(" ",$query);
-        foreach($results as $result)
-        {
-
-            foreach($result->words as $word){
-                if(in_array($word->text_madani,$words_query) || in_array($word->text_simple,$words_query)){
-                    $word->setAttribute('highlight','hlt1');
+        $words_query = explode(" ", $query); // $text = preg_replace("/".$word_query."/i", "<em class='hlt1'>\$0</em>", $text);
+        foreach ($results as $result) {
+            foreach ($result->translations as $translation) {
+                foreach ($words_query as $word_query) {
+                    $translation->text = preg_replace("/" . $word_query . "/i", "<em class='hlt1'>\$0</em>", $translation->text);
                 }
-                else{
+            }
+            foreach ($result->words as $word) {
+
+                if (in_array($word->text_madani, $words_query) || in_array($word->text_simple, $words_query)) {
+                    $word->setAttribute('highlight', 'hlt1');
+                } else {
                     $word->setAttribute('highlight', null);
                 }
             }
-        //     if($result->translation){
-        //     $result->translation->text = str_ireplace($query, '<em class="hlt1">' . $query . '</em>', $result->translation->text);
-        //     //$result->translation->text = preg_replace('','<em class="hlt1">' . $query . '</em>',$query);
-        //     }
         }
         $time = microtime(true) - $start; //end timer
         return [
@@ -531,7 +530,7 @@ class APIController extends Controller
     {
         $query = null;
         $limit = 10;
-        if(isset($request->q)){
+        if (isset($request->q)) {
             $query = $request->q;
         }
         $suggests = collect();
@@ -558,30 +557,29 @@ class APIController extends Controller
             $words_text_indopak = explode(" ", $record->text_indopak);
             $words_text_simple = explode(" ", $record->text_simple);
             foreach ($words_query as $word_query) {
-                $match = array_search($word_query, $words_text_madani );
+                $match = array_search($word_query, $words_text_madani);
                 if ($match !== false) {
-                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
-                 }
-                 $match = array_search($word_query, $words_text_indopak);
-                if ($match!== false) {
-                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
-                 }
-                 $match = array_search($word_query, $words_text_simple);
-                if ($match!== false) {
-                    $words_text_madani[$match] = "<em class='hlt1'>".$words_text_madani[$match]."</em>";
-                 }
+                    $words_text_madani[$match] = "<em class='hlt1'>" . $words_text_madani[$match] . "</em>";
+                }
+                $match = array_search($word_query, $words_text_indopak);
+                if ($match !== false) {
+                    $words_text_madani[$match] = "<em class='hlt1'>" . $words_text_madani[$match] . "</em>";
+                }
+                $match = array_search($word_query, $words_text_simple);
+                if ($match !== false) {
+                    $words_text_madani[$match] = "<em class='hlt1'>" . $words_text_madani[$match] . "</em>";
+                }
             }
-            $text = implode(" ",$words_text_madani);
+            $text = implode(" ", $words_text_madani);
             $suggest = collect();
-            $suggest->put('text',$text);
-            $suggest->put('href',$record->href);
-            $suggest->put('ayah',$record->verse_key);
+            $suggest->put('text', $text);
+            $suggest->put('href', $record->href);
+            $suggest->put('ayah', $record->verse_key);
             $suggests->push($suggest);
         }
-            if(count($suggests)<$limit)
-            {
-                $limit = $limit-count($suggests);
-                $sql = "SELECT
+        if (count($suggests) < $limit) {
+            $limit = $limit - count($suggests);
+            $sql = "SELECT
                     id,verse_id,text,resource_id,MATCH (text) AGAINST (
                         '$query' IN NATURAL LANGUAGE MODE
                     ) AS rank
@@ -595,21 +593,20 @@ class APIController extends Controller
                         rank DESC
                     LIMIT $limit Offset 0";
 
-                    $records = \DB::connection('mysql')->select(\DB::raw($sql));
-                    foreach($records as $record){
-                        $suggest = collect();
-                        $text = $record->text;
-                        foreach($words_query as $word_query){
-                        $text = preg_replace("/".$word_query."/i", "<em class='hlt1'>\$0</em>", $text);
-                    }
-                        $suggest->put('text',$text);
-                        $verse = Verses::select('chapter_id','verse_number','verse_key')->where('id',$record->verse_id)->first();
-                        $href = $verse->chapter_id.'/'.$verse->verse_number.'?translations[]='.$record->resource_id;
-                        $suggest->put('href',$href);
-                        $suggest->put('ayah',$verse->verse_key);
-                        $suggests->push($suggest);
-                    }
-
+            $records = \DB::connection('mysql')->select(\DB::raw($sql));
+            foreach ($records as $record) {
+                $suggest = collect();
+                $text = $record->text;
+                foreach ($words_query as $word_query) {
+                    $text = preg_replace("/" . $word_query . "/i", "<em class='hlt1'>\$0</em>", $text);
+                }
+                $suggest->put('text', $text);
+                $verse = Verses::select('chapter_id', 'verse_number', 'verse_key')->where('id', $record->verse_id)->first();
+                $href = $verse->chapter_id . '/' . $verse->verse_number . '?translations[]=' . $record->resource_id;
+                $suggest->put('href', $href);
+                $suggest->put('ayah', $verse->verse_key);
+                $suggests->push($suggest);
+            }
         }
         return $suggests;
     }
