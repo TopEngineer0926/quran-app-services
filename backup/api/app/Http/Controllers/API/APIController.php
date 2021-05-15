@@ -33,7 +33,7 @@ class APIController extends Controller
      */
     protected function chapters(Request $request)
     {
-        $language = 'en';
+        $language = 'de';
         if (isset($request->language)) {
             $language = $request->language;
         }
@@ -69,7 +69,7 @@ class APIController extends Controller
     protected function chapter_info($id, Request $request)
     {
         $chapter_info = null;
-        $language = 'en';
+        $language = 'de';
         if (isset($request->language)) {
             $language = $request->language;
         }
@@ -95,7 +95,7 @@ class APIController extends Controller
      */
     protected function chapter($id, Request $request)
     {
-        $language = 'en';
+        $language = 'de';
         if (isset($request->language)) {
             $language = $request->language;
         }
@@ -134,7 +134,7 @@ class APIController extends Controller
      */
     protected function verses($id, Request $request)
     {
-        $language = 'en';
+        $language = 'de';
         $limit = 10;
         $offset = 0;
         $audio_files = array();
@@ -266,7 +266,7 @@ class APIController extends Controller
      */
     protected function audio_file($id, $verse_id, Request $request)
     {
-        $language = 'en';
+        $language = 'de';
         $recitations = null;
         $recitation = null;
         $audio_files = array();
@@ -330,7 +330,7 @@ class APIController extends Controller
 
     protected function audio_files(Request $request, $id)
     {
-        $language = 'en';
+        $language = 'de';
         $recitation = null;
         $start = null;
         $end = null;
