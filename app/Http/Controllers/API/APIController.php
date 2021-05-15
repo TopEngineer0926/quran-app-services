@@ -83,7 +83,7 @@ class APIController extends Controller
     protected function chapter_info($id, Request $request)
     {
         $chapter_info = null;
-        $language = 'de';
+        $language = 'en';
         if (isset($request->language)) {
             $language = $request->language;
         }
